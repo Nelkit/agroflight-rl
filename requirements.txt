@@ -1,0 +1,17 @@
+# Core simulation + RL environment
+mujoco
+gymnasium
+numpy
+
+# Training (CleanRL's PPO implementation -- we do not reimplement PPO)
+cleanrl[mujoco]
+
+# Experiment tracking
+tensorboard
+
+# Testing
+pytest
+
+# TODO (team): pin exact versions (`pip freeze > requirements.lock.txt`) once
+# the pipeline runs end-to-end, so all three of us and the marker reproduce the
+# same results. Unpinned deps are fine while scaffolding, not at submission.

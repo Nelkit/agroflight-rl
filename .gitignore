@@ -1,0 +1,38 @@
+# --- MuJoCo model clone (fetched via `make menagerie`, never committed) ---
+mujoco_menagerie/
+# Scene XML generated next to the model by scene_builder
+**/x2_plantation_scene.xml
+
+# --- Training artefacts ---
+runs/
+checkpoints/
+wandb/
+*.pt
+*.pth
+*.ckpt
+events.out.tfevents.*
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+
+# --- Editors / OS ---
+.DS_Store
+.vscode/
+.idea/
+*.swp

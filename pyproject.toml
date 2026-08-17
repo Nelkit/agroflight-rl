@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agroflight-rl"
+version = "0.1.0"
+description = "RL for crop-row quadrotor flight control (MuJoCo Skydio X2)"
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "mujoco",
+    "gymnasium",
+    "numpy",
+    "tensorboard",
+]
+
+[project.optional-dependencies]
+# CleanRL pins a lot of transitive deps; keep it separable so a broken CleanRL
+# release cannot block the env + tests from installing.
+train = ["cleanrl[mujoco]"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
