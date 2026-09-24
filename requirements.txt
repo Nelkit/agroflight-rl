@@ -3,8 +3,11 @@ mujoco
 gymnasium
 numpy
 
-# Training (CleanRL's PPO implementation -- we do not reimplement PPO)
-cleanrl[mujoco]
+# Training and notebooks (PPO uses CleanRL's single-file script copied into the
+# repo; the pip `cleanrl` 0.4.8 package is broken with gymnasium)
+torch
+matplotlib
+pandas
 
 # Experiment tracking
 tensorboard

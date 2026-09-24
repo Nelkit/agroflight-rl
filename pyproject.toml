@@ -17,9 +17,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# CleanRL pins a lot of transitive deps; keep it separable so a broken CleanRL
-# release cannot block the env + tests from installing.
-train = ["cleanrl[mujoco]"]
+# Notebooks and training. The pip `cleanrl` package (0.4.8) is an old gym-era
+# release that fails on import; PPO uses CleanRL's single-file script copied
+# into the repo instead.
+train = ["torch", "matplotlib", "pandas"]
 dev = ["pytest"]
 
 [tool.setuptools.packages.find]
