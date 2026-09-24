@@ -10,10 +10,13 @@ from gymnasium.envs.registration import register, registry
 
 from agroflight.envs.agro_drone_env import (
     ACTION_SCALE,
+    DEFAULT_LEVEL,
+    LEVELS,
     OBS_DIM,
     OBS_IDX_VZ,
     OBS_LAYOUT,
     AgroDroneEnv,
+    RewardConfig,
 )
 from agroflight.envs.scene_builder import build_plantation_scene
 
@@ -41,6 +44,9 @@ __all__ = [
     "build_plantation_scene",
     "ENV_ID",
     "ACTION_SCALE",
+    "DEFAULT_LEVEL",
+    "LEVELS",
+    "RewardConfig",
     "OBS_DIM",
     "OBS_IDX_VZ",
     "OBS_LAYOUT",

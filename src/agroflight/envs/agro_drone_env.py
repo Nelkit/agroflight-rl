@@ -17,6 +17,7 @@ The reward is still the ILLUSTRATIVE placeholder from the exploration
 prototype and has NOT been validated for training. See the TODO block in step().
 """
 import os
+from dataclasses import dataclass
 
 import gymnasium as gym
 import mujoco
@@ -49,6 +50,39 @@ OBS_IDX_VZ = 8
 ACTION_SCALE = np.array([2.0, 1.0, 1.0, 1.0])
 
 
+@dataclass
+class RewardConfig:
+    """Reward v1 weights, all configurable for sensitivity analysis (Part B).
+
+    reward = -(w_alt*alt_err^2 + w_lat*lateral_err^2 + w_tilt*tilt^2 + w_action*|action|^2)
+             + w_progress*(metres gained along the row) + survival_bonus
+             - crash_penalty (on crash) + completion_bonus (on finishing the row)
+    """
+    w_alt: float = 2.0
+    w_lat: float = 2.0
+    w_tilt: float = 0.5
+    w_action: float = 0.01
+    w_progress: float = 10.0
+    survival_bonus: float = 0.02
+    crash_penalty: float = 50.0
+    completion_bonus: float = 20.0
+
+
+# Difficulty levels, fixed in advance (Part B) and never adjusted per algorithm.
+#   wind:        "none", "steady" (constant sideways wind per episode) or "gusting" (random walk)
+#   spawn_offset: max random sideways start offset in metres
+#   row_task:    progress reward and row-finish condition on (off = altitude hold only)
+#   yaw_free:    the policy may command yaw rate
+LEVELS = {
+    0: dict(wind="none", spawn_offset=0.0, row_task=False, yaw_free=False),
+    1: dict(wind="none", spawn_offset=0.15, row_task=True, yaw_free=False),
+    2: dict(wind="steady", spawn_offset=0.15, row_task=True, yaw_free=False),
+    3: dict(wind="gusting", spawn_offset=0.15, row_task=True, yaw_free=False),
+    4: dict(wind="gusting", spawn_offset=0.15, row_task=True, yaw_free=True),
+}
+DEFAULT_LEVEL = 3
+
+
 def _resolve_xml_path(xml_path):
     """Resolve the scene XML path, falling back to the AGRO_DRONE_XML env var."""
     if xml_path is not None:
@@ -69,7 +103,7 @@ class AgroDroneEnv(gym.Env):
 
     def __init__(self, xml_path=None, target_altitude=1.2, field_length=8.0,
                  wind_strength=0.6, max_steps=1000, seed=None,
-                 frame_skip=1, yaw_free=False):
+                 frame_skip=1, yaw_free=None, level=DEFAULT_LEVEL, reward_config=None):
         super().__init__()
         self.model = mujoco.MjModel.from_xml_path(_resolve_xml_path(xml_path))
         self.data = mujoco.MjData(self.model)
@@ -79,7 +113,21 @@ class AgroDroneEnv(gym.Env):
         self.wind_strength = wind_strength
         self.max_steps = max_steps
         self.frame_skip = frame_skip
-        self.yaw_free = yaw_free
+
+        if level not in LEVELS:
+            raise ValueError(f"level must be one of {sorted(LEVELS)}, got {level!r}")
+        spec = LEVELS[level]
+        self.level = level
+        self._wind_mode = spec["wind"]
+        self._spawn_offset = spec["spawn_offset"]
+        self._row_task = spec["row_task"]
+        self.yaw_free = spec["yaw_free"] if yaw_free is None else yaw_free
+
+        if reward_config is None:
+            reward_config = RewardConfig()
+        elif isinstance(reward_config, dict):
+            reward_config = RewardConfig(**reward_config)
+        self.reward_config = reward_config
 
         # BUGFIX (was `xfrc_applied[1]`): the prototype hardcoded body index 1
         # as the drone. That only holds when the drone body happens to be the
@@ -120,10 +168,12 @@ class AgroDroneEnv(gym.Env):
         ).astype(np.float32)
 
     def _apply_wind(self):
-        # slowly-varying random lateral/vertical gust, applied as a translational
-        # force on the drone body -- this is the disturbance the policy must reject
-        self._wind += self._rng.normal(0, 0.05, size=2)
-        self._wind = np.clip(self._wind, -self.wind_strength, self.wind_strength)
+        # gusting: slowly-varying random lateral/vertical wind (random walk).
+        # steady / none: the wind was fixed once in reset(). Applied as a
+        # translational force on the drone body -- the disturbance the policy must reject.
+        if self._wind_mode == "gusting":
+            self._wind += self._rng.normal(0, 0.05, size=2)
+            self._wind = np.clip(self._wind, -self.wind_strength, self.wind_strength)
         self.data.xfrc_applied[self._drone_body_id, 0] = 0.0
         self.data.xfrc_applied[self._drone_body_id, 1] = self._wind[0]        # lateral (y)
         self.data.xfrc_applied[self._drone_body_id, 2] = self._wind[1] * 0.3  # small vertical gust
@@ -146,10 +196,13 @@ class AgroDroneEnv(gym.Env):
         self.data.xfrc_applied[:] = 0.0
 
         # small random start offset so every episode is slightly different
-        self.data.qpos[1] += self._rng.uniform(-0.15, 0.15)
+        self.data.qpos[1] += self._rng.uniform(-self._spawn_offset, self._spawn_offset)
         self.data.qpos[2] = self.target_altitude + self._rng.uniform(-0.1, 0.1)
         self._steps = 0
         self._wind = np.zeros(2)
+        if self._wind_mode == "steady":
+            sign = self._rng.choice([-1.0, 1.0])
+            self._wind[0] = sign * self._rng.uniform(0.5, 1.0) * self.wind_strength
         mujoco.mj_forward(self.model, self.data)
         return self._get_obs(), {}
 
@@ -157,6 +210,7 @@ class AgroDroneEnv(gym.Env):
         action = np.clip(action, self.action_space.low, self.action_space.high)
         cmd = action * ACTION_SCALE
 
+        prev_x = float(self.data.qpos[0])
         self._apply_wind()
         for _ in range(self.frame_skip):
             self.data.ctrl[:] = self.controller.thrusts(
@@ -173,39 +227,35 @@ class AgroDroneEnv(gym.Env):
         up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
         tilt = np.arccos(np.clip(up_z, -1.0, 1.0))
 
-        # ------------------------------------------------------------------
-        # TODO (team): REWARD DESIGN IS YOUR WORK.
-        # These weights are the illustrative values carried over unchanged from
-        # the exploration prototype. They have NOT been validated to produce
-        # good flying behaviour when trained. Expect to iterate on them -- and
-        # possibly add terms (e.g. an explicit forward-progress reward, which
-        # is currently only rewarded via the terminal finished_row bonus).
-        # Watch for reward hacking: inspect actual flight behaviour in the
-        # viewer, not just the reward curve.
-        # ------------------------------------------------------------------
-        action_cost = 0.01 * np.sum(np.square(action))
+        # Reward v1 (Part B). The weights in RewardConfig are first-pass defaults,
+        # NOT tuned: iterate on them and watch actual flight in the viewer for
+        # reward hacking, not only the reward curve.
+        cfg = self.reward_config
         reward = (
-            -1.0 * abs(alt_error)
-            - 1.0 * abs(lateral_offset)
-            - 0.5 * tilt
-            - action_cost
-            + 0.05  # small "still flying" bonus per step
+            -cfg.w_alt * alt_error ** 2
+            - cfg.w_lat * lateral_offset ** 2
+            - cfg.w_tilt * tilt ** 2
+            - cfg.w_action * np.sum(np.square(action))
+            + cfg.survival_bonus
         )
+        if self._row_task:
+            reward += cfg.w_progress * (float(pos[0]) - prev_x)
 
         crashed = bool(pos[2] < 0.08 or tilt > 1.2)   # hit ground or flipped over
-        finished_row = bool(pos[0] >= self.field_length)
+        finished_row = bool(self._row_task and pos[0] >= self.field_length)
         truncated = self._steps >= self.max_steps
         terminated = crashed or finished_row
 
         if crashed:
-            reward -= 20.0
+            reward -= cfg.crash_penalty
         if finished_row:
-            reward += 20.0
+            reward += cfg.completion_bonus
 
         info = {
             "crashed": crashed,
             "finished_row": finished_row,
             "alt_error": float(alt_error),
             "lateral_offset": float(lateral_offset),
+            "x": float(pos[0]),
         }
         return self._get_obs(), float(reward), terminated, truncated, info

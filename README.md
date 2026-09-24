@@ -78,26 +78,41 @@ hover from raw motor commands. Yaw is held at 0 unless `yaw_free=True` (L4).
 ### Reward
 
 ```
-reward = −1.0 · |alt_error|
-         −1.0 · |lateral_offset|
-         −0.5 · tilt
-         −0.01 · Σ(action²)
-         +0.05                  (per-step "still flying" bonus)
-         −20.0                  if crashed
-         +20.0                  if the row was completed
+reward = −(w_alt·alt_error² + w_lat·lateral_offset² + w_tilt·tilt² + w_action·|action|²)
+         + w_progress · (metres gained along the row)
+         + survival_bonus                     (per step)
+         − crash_penalty                      if crashed
+         + completion_bonus                   if the row was completed
 ```
 
-`tilt` is the angle between the drone's up-axis and world-up (0 = level).
+`tilt` is the angle between the drone's up-axis and world-up (0 = level). All
+weights live in `RewardConfig` (defaults: 2, 2, 0.5, 0.01, 10, 0.02, 50, 20) and
+can be overridden with `AgroDroneEnv(reward_config=dict(...))` for sensitivity
+analysis. The progress term and completion bonus are set so that finishing the
+row beats hovering in place (checked in the tests).
 
-> **These weights are the illustrative prototype values and have not been
-> validated for training.** Tuning them is project work — see the TODOs.
+> **These are first-pass defaults, not tuned.** Tuning them is project work, and
+> flights must be watched in the viewer for reward hacking.
+
+### Difficulty levels
+
+Fixed in advance (Part B) and never adjusted per algorithm. Pick one with
+`gym.make("AgroDrone-v0", level=k)`; the default is `3`.
+
+| Level | Wind | Spawn | Task |
+| ----- | ---- | ----- | ---- |
+| L0 | none | on the row | altitude hold only (no progress reward, no finish) |
+| L1 | none | ±0.15 m offset | full row following |
+| L2 | steady sideways, fixed per episode | ±0.15 m offset | full row following |
+| L3 | gusting (random walk) | ±0.15 m offset | full row following |
+| L4 | gusting | ±0.15 m offset | full row following, yaw rate free |
 
 ### Episode termination
 
 | Condition | Flag | Type |
 | --------- | ---- | ---- |
 | `z < 0.08` or `tilt > 1.2 rad` | `crashed` | terminated |
-| `x ≥ field_length` | `finished_row` | terminated |
+| `x ≥ field_length` (levels L1–L4) | `finished_row` | terminated |
 | `steps ≥ max_steps` (default 1000) | — | truncated |
 
 ### Configuration
@@ -108,6 +123,8 @@ reward = −1.0 · |alt_error|
 | `field_length` | `8.0` | Row length before completion (m) |
 | `wind_strength` | `0.6` | Max wind force magnitude (set `0.0` to disable) |
 | `max_steps` | `1000` | Truncation limit (10 s at `dt = 0.01`) |
+| `level` | `3` | Difficulty level L0–L4 (see above) |
+| `reward_config` | `None` | `RewardConfig` or dict of weight overrides |
 | `frame_skip` | `1` | Physics steps per action |
 | `yaw_free` | `False` | Let the policy command yaw rate |
 | `seed` | `None` | RNG seed for wind and start offset |
@@ -212,8 +229,7 @@ unresolved in this scaffold.
 
 ### Reward design — `src/agroflight/envs/agro_drone_env.py`
 - [ ] Tune the weights (altitude, lateral, tilt, action cost, step bonus).
-- [ ] Decide whether forward progress needs its own reward term (currently it
-      is only rewarded through the terminal `finished_row` bonus).
+- [x] Forward progress has its own reward term (`w_progress`) in reward v1.
 - [ ] Revisit the crash penalty / completion bonus magnitudes.
 - [ ] Check for reward hacking — watch actual flight in the viewer, not just
       the reward number.
