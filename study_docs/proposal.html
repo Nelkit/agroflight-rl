@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriFlight-RL — Project Proposal</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:        #f9f9f7;
+    --surface:     #fcfcfb;
+    --surface-2:   #f3f2ee;
+    --ink:         #0b0b0b;
+    --ink-2:       #52514e;
+    --ink-muted:   #898781;
+    --hairline:    #e1e0d9;
+    --baseline:    #c3c2b7;
+    --border:      rgba(11,11,11,0.10);
+
+    --blue:        #2a78d6;
+    --orange:      #eb6834;
+    --green:       #1baf7a;
+    --violet:      #4a3aa7;
+
+    --good:        #0ca30c;
+    --warning:     #fab219;
+    --serious:     #ec835a;
+    --critical:    #d03b3b;
+
+    --success-text:#006300;
+    --radius:      14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page:        #0d0d0d;
+      --surface:     #1a1a19;
+      --surface-2:   #202020;
+      --ink:         #ffffff;
+      --ink-2:       #c3c2b7;
+      --ink-muted:   #898781;
+      --hairline:    #2c2c2a;
+      --baseline:    #383835;
+      --border:      rgba(255,255,255,0.10);
+
+      --blue:        #3987e5;
+      --orange:      #d95926;
+      --green:       #199e70;
+      --violet:      #9085e9;
+
+      --good:        #0ca30c;
+      --warning:     #fab219;
+      --serious:     #ec835a;
+      --critical:    #e66767;
+      --success-text:#0ca30c;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:        #0d0d0d;
+    --surface:     #1a1a19;
+    --surface-2:   #202020;
+    --ink:         #ffffff;
+    --ink-2:       #c3c2b7;
+    --ink-muted:   #898781;
+    --hairline:    #2c2c2a;
+    --baseline:    #383835;
+    --border:      rgba(255,255,255,0.10);
+
+    --blue:        #3987e5;
+    --orange:      #d95926;
+    --green:       #199e70;
+    --violet:      #9085e9;
+
+    --good:        #0ca30c;
+    --warning:     #fab219;
+    --serious:     #ec835a;
+    --critical:    #e66767;
+    --success-text:#0ca30c;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 0 20px 80px; }
+  section { padding-top: 64px; scroll-margin-top: 64px; }
+  h1, h2, h3 { line-height: 1.2; margin: 0; }
+  h2 { font-size: 1.5rem; }
+  p { color: var(--ink-2); margin: 8px 0 0; }
+  a { color: var(--blue); }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--page) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .topbar-inner {
+    max-width: 980px; margin: 0 auto; padding: 12px 20px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: baseline; gap: 8px; font-weight: 700; white-space: nowrap; }
+  .brand small { font-weight: 400; color: var(--ink-muted); font-size: 0.75rem; }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+  .tab {
+    font: inherit; font-size: 0.82rem; color: var(--ink-2); background: none;
+    border: 1px solid transparent; border-radius: 999px; padding: 6px 12px;
+    cursor: pointer;
+  }
+  .tab:hover { background: var(--surface-2); }
+  .tab.active { color: var(--ink); background: var(--surface-2); border-color: var(--hairline); font-weight: 600; }
+  .theme-toggle {
+    border: 1px solid var(--hairline); background: var(--surface); color: var(--ink-2);
+    border-radius: 999px; width: 32px; height: 32px; cursor: pointer; font-size: 0.9rem;
+  }
+
+  .hero { padding: 48px 0 24px; }
+  .hero h1 { font-size: 2rem; }
+  .hero p { max-width: 640px; font-size: 1.02rem; }
+  .kicker { color: var(--ink-muted); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 700; }
+
+  .stat-strip {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px; background: var(--hairline); border: 1px solid var(--hairline);
+    border-radius: var(--radius); overflow: hidden; margin-top: 24px;
+  }
+  .stat-tile { background: var(--surface); padding: 16px; }
+  .stat-tile .label { font-size: 0.76rem; color: var(--ink-muted); }
+  .stat-tile .value { font-size: 1.05rem; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.good { background: var(--good); }
+  .dot.warn { background: var(--warning); }
+  .dot.pending { background: var(--ink-muted); }
+
+  .section-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
+  .section-num { color: var(--ink-muted); font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .fact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 20px; }
+  .fact-card { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 16px; }
+  .fact-card .icon { font-size: 1.3rem; }
+  .fact-card h3 { font-size: 0.92rem; margin-top: 8px; }
+  .fact-card p { font-size: 0.86rem; margin-top: 4px; }
+
+  .callout { border-radius: var(--radius); padding: 14px 16px; display: flex; gap: 10px; margin-top: 16px; font-size: 0.88rem; border: 1px solid var(--hairline); }
+  .callout .icon { flex: none; }
+  .callout.warning { background: color-mix(in srgb, var(--warning) 12%, var(--surface)); border-color: color-mix(in srgb, var(--warning) 40%, var(--hairline)); }
+  .callout p { color: var(--ink); margin: 0; }
+  .callout strong { display: block; margin-bottom: 2px; }
+
+  .loop { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 24px; }
+  .node {
+    font: inherit; font-size: 0.86rem; font-weight: 600; color: var(--ink);
+    background: var(--surface); border: 1.5px solid var(--hairline); border-radius: 999px;
+    padding: 10px 16px; cursor: pointer; white-space: nowrap;
+  }
+  .node[data-color="blue"] { border-color: color-mix(in srgb, var(--blue) 55%, var(--hairline)); }
+  .node[data-color="orange"] { border-color: color-mix(in srgb, var(--orange) 55%, var(--hairline)); }
+  .node[data-color="green"] { border-color: color-mix(in srgb, var(--green) 55%, var(--hairline)); }
+  .node[data-color="violet"] { border-color: color-mix(in srgb, var(--violet) 55%, var(--hairline)); }
+  .node.active[data-color="blue"] { background: color-mix(in srgb, var(--blue) 16%, var(--surface)); }
+  .node.active[data-color="orange"] { background: color-mix(in srgb, var(--orange) 16%, var(--surface)); }
+  .node.active[data-color="green"] { background: color-mix(in srgb, var(--green) 16%, var(--surface)); }
+  .node.active[data-color="violet"] { background: color-mix(in srgb, var(--violet) 16%, var(--surface)); }
+  .arrow { color: var(--ink-muted); font-size: 1.1rem; }
+  .loop-back { width: 100%; font-size: 0.78rem; color: var(--ink-muted); margin-top: -2px; }
+
+  .node-detail { margin-top: 16px; }
+  .node-detail .card p { margin: 0; color: var(--ink); font-size: 0.9rem; }
+  .node-detail .card .tag { font-size: 0.72rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+
+  .legend { display: flex; gap: 18px; margin: 20px 0 4px; font-size: 0.82rem; color: var(--ink-2); flex-wrap: wrap; }
+  .legend .swatch { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .swatch i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+  .metric-toggle { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .metric-toggle button {
+    font: inherit; font-size: 0.8rem; border: 1px solid var(--hairline); background: var(--surface);
+    color: var(--ink-2); border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  }
+  .metric-toggle button.active { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+
+  .metric-panel { display: none; }
+  .metric-panel.active { display: block; }
+  .metric-panel .metric-title { font-weight: 600; font-size: 0.95rem; }
+  .metric-panel .metric-sub { font-size: 0.8rem; color: var(--ink-muted); margin-top: 2px; }
+
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+  .bar-name { width: 96px; flex: none; font-size: 0.84rem; color: var(--ink-2); }
+  .bar-track { flex: 1; height: 24px; background: var(--surface-2); border-radius: 4px; position: relative; overflow: visible; }
+  .bar-fill {
+    height: 24px; border-radius: 4px 4px 4px 4px; position: relative;
+    display: flex; align-items: center;
+  }
+  .bar-fill.blue { background: var(--blue); }
+  .bar-fill.orange { background: var(--orange); }
+  .bar-value {
+    position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%);
+    font-size: 0.82rem; font-weight: 600; color: var(--ink); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .bar-fill:hover::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 6px); left: 0;
+    background: var(--ink); color: var(--page); font-size: 0.72rem;
+    padding: 4px 8px; border-radius: 6px; white-space: nowrap; z-index: 5;
+  }
+  .target-pill {
+    margin-top: 10px; display: inline-block; font-size: 0.78rem; color: var(--ink-2);
+    border: 1.5px dashed var(--baseline); border-radius: 999px; padding: 5px 12px;
+  }
+
+  .steps { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .step { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+  .step-header {
+    width: 100%; text-align: left; font: inherit; background: none; border: none; cursor: pointer;
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px; color: var(--ink);
+  }
+  .step-header .n {
+    flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; color: var(--ink-2);
+  }
+  .step-header .title { font-weight: 600; font-size: 0.92rem; flex: 1; }
+  .step-header .phase { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+  .phase.built { color: var(--success-text); background: color-mix(in srgb, var(--good) 16%, transparent); }
+  .phase.progress { color: color-mix(in srgb, var(--warning) 60%, var(--ink)); background: color-mix(in srgb, var(--warning) 20%, transparent); }
+  .phase.contingency { color: var(--ink-muted); background: var(--surface-2); }
+  .phase.todo { color: var(--ink-muted); background: var(--surface-2); }
+  .step-header .chev { color: var(--ink-muted); transition: transform 0.15s; flex: none; }
+  .step.open .chev { transform: rotate(90deg); }
+  .step-body { max-height: 0; overflow: hidden; transition: max-height 0.2s ease; }
+  .step.open .step-body { max-height: 420px; }
+  .step-body-inner { padding: 0 16px 16px 54px; font-size: 0.86rem; color: var(--ink-2); }
+  .step-body-inner .lib { color: var(--ink); font-weight: 600; }
+
+  .filter-bar { display: flex; gap: 6px; margin: 20px 0 4px; }
+  .filter-bar button {
+    font: inherit; font-size: 0.8rem; border: 1px solid var(--hairline); background: var(--surface);
+    color: var(--ink-2); border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  }
+  .filter-bar button.active { background: var(--ink); color: var(--page); border-color: var(--ink); }
+
+  .status-list { display: flex; flex-direction: column; gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); border-radius: var(--radius); overflow: hidden; margin-top: 16px; }
+  .status-item { background: var(--surface); padding: 13px 16px; display: flex; align-items: center; gap: 12px; }
+  .status-item .dot { width: 10px; height: 10px; }
+  .status-item .txt { flex: 1; }
+  .status-item .txt .t { font-size: 0.9rem; font-weight: 600; }
+  .status-item .txt .d { font-size: 0.8rem; color: var(--ink-muted); margin-top: 1px; }
+  .status-item .badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 3px 9px; border-radius: 999px; flex: none; }
+  .badge.done { color: var(--success-text); background: color-mix(in srgb, var(--good) 16%, transparent); }
+  .badge.progress { color: color-mix(in srgb, var(--warning) 60%, var(--ink)); background: color-mix(in srgb, var(--warning) 20%, transparent); }
+  .badge.pending { color: var(--ink-muted); background: var(--surface-2); }
+  .status-item .txt .d b { color: var(--ink-2); font-weight: 600; }
+  .key-dates { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 16px; }
+  .kd { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 12px 14px; }
+  .kd .d { font-size: 0.72rem; color: var(--ink-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kd .t { font-size: 0.86rem; font-weight: 600; margin-top: 2px; }
+  .kd.due { border-color: color-mix(in srgb, var(--blue) 55%, var(--hairline)); }
+
+  footer { max-width: 980px; margin: 0 auto; padding: 32px 20px 60px; color: var(--ink-muted); font-size: 0.78rem; border-top: 1px solid var(--hairline); margin-top: 40px; }
+
+  @media (max-width: 640px) {
+    .tabs { width: 100%; order: 3; }
+    .bar-name { width: 76px; font-size: 0.76rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">AgriFlight-RL <small>project proposal</small></div>
+    <div class="tabs" id="tabs">
+      <button class="tab" data-target="necessity">Necessity</button>
+      <button class="tab" data-target="proposal">Proposal</button>
+      <button class="tab" data-target="outcome">Outcome</button>
+      <button class="tab" data-target="tools">RL Tools</button>
+      <button class="tab" data-target="state">Current State</button>
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">◐</button>
+  </div>
+</div>
+
+<main>
+
+  <div class="hero">
+    <div class="kicker">43008 Reinforcement Learning — Assignment 3 — Team LMF · Part C Mon 5 Oct · Part D Mon 12 Oct · Part E Fri 23 Oct</div>
+    <h1>Reinforcement learning for crop-row flight stabilization</h1>
+    <p>A simulated quadrotor learns to fly a crop row at fixed altitude and reject wind gusts — a real, largely unsolved precision-agriculture control problem, tackled with deep RL in a physics-accurate simulator. Three policy-gradient algorithms (PPO, REINFORCE, A2C) are compared on one shared environment.</p>
+
+    <div class="stat-strip">
+      <div class="stat-tile">
+        <div class="label">Environment</div>
+        <div class="value"><span class="dot warn"></span>Built · v1 rework due Sun 27 Sep</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Baselines</div>
+        <div class="value"><span class="dot good"></span>Evaluated — real data</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Training</div>
+        <div class="value"><span class="dot warn"></span>0 runs · gate Fri 2 Oct</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Next deadline</div>
+        <div class="value"><span class="dot pending"></span>Part C · Mon 5 Oct</div>
+      </div>
+    </div>
+  </div>
+
+  <section id="necessity">
+    <div class="section-head"><span class="section-num">01</span><h2>Necessity</h2></div>
+    <p>Precision agriculture leans on drones for crop monitoring, but reliable low-altitude flight over crop rows under wind disturbance is still an open control problem outside expensive commercial autopilots. Hand-tuned control is brittle: it has no way to adapt beyond the rules it was given.</p>
+
+    <div class="fact-grid">
+      <div class="fact-card"><div class="icon">🌾</div><h3>Precision ag needs it</h3><p>Row-level crop monitoring by drone is only useful if flight is stable enough to trust the imagery.</p></div>
+      <div class="fact-card"><div class="icon">💨</div><h3>Wind is the hard part</h3><p>Disturbance is random and continuous — a fixed control law can't be tuned for every gust.</p></div>
+      <div class="fact-card"><div class="icon">🤖</div><h3>RL adapts, PID doesn't</h3><p>A learned policy can correct for disturbance patterns it was trained on, not just the one case it was tuned for.</p></div>
+      <div class="fact-card"><div class="icon">🧪</div><h3>Sim-first, honestly scoped</h3><p>MuJoCo lets us iterate before any physical flight test, while we openly acknowledge the sim-to-real gap.</p></div>
+    </div>
+
+    <div class="callout warning">
+      <span class="icon">⚠️</span>
+      <p><strong>Our own baseline already proves the point.</strong> The hand-coded altitude-hold controller holds altitude to 1.3&nbsp;cm of error on average — genuinely excellent — yet it <em>never once reaches the end of the row</em> in 20 evaluation episodes, because a fixed PD law has no mechanism to correct lateral drift or push forward. That gap is exactly what a learned policy needs to close.</p>
+    </div>
+  </section>
+
+  <section id="proposal">
+    <div class="section-head"><span class="section-num">02</span><h2>Proposal</h2></div>
+    <p><strong>AgriFlight-RL</strong> trains a policy to fly a simulated quadrotor along a crop row at a fixed 1.2 m, staying on the centreline and making forward progress despite continuous random wind. The policy outputs four high-level commands and a fixed inner controller drives the rotors. We formulate it as an MDP, solve it with deep RL, and compare three policy-gradient algorithms on one shared environment and reward. Click a stage to see what's inside it.</p>
+
+    <div class="loop" id="mdpLoop">
+      <button class="node" data-color="blue" data-node="state">State</button>
+      <span class="arrow">→</span>
+      <button class="node" data-color="violet" data-node="policy">Policy (PPO · REINFORCE · A2C)</button>
+      <span class="arrow">→</span>
+      <button class="node" data-color="orange" data-node="action">Action</button>
+      <span class="arrow">→</span>
+      <button class="node" data-color="green" data-node="env">Physics (MuJoCo)</button>
+      <span class="arrow">→</span>
+      <button class="node" data-color="blue" data-node="reward">Reward</button>
+      <div class="loop-back">↩ reward + next state feed back into the policy for the next step</div>
+    </div>
+
+    <div class="node-detail" id="nodeDetail"></div>
+    <p style="margin-top:14px;font-size:0.86rem;"><strong>Who trains what:</strong> Nelkit — PPO (CleanRL) · Juan — REINFORCE · Panzhao — A2C. Juan also owns the environment. Day-by-day plan: <a href="project_calendar.html">project_calendar.html</a>.</p>
+  </section>
+
+  <section id="outcome">
+    <div class="section-head"><span class="section-num">03</span><h2>Desired outcome</h2></div>
+    <p>Success is trained policies that beat both hand-coded baselines — altitude-hold and random — on the same seeded episodes, reported as the <strong>highest difficulty level (L0–L4) each algorithm clears and the samples it needs</strong>. The bars below are <strong>real baseline numbers</strong> from <code>evaluate_policy.py</code> on the current raw-thrust environment, to be re-measured after the env v1 freeze on Sun 27 Sep; no training has produced another bar yet. Part B also compares training stability, sample efficiency and flight steps.</p>
+
+    <div class="legend">
+      <span class="swatch"><i style="background:var(--blue)"></i>Altitude-hold (PD baseline)</span>
+      <span class="swatch"><i style="background:var(--orange)"></i>Random (floor baseline)</span>
+    </div>
+
+    <div class="metric-toggle" id="metricToggle">
+      <button class="active" data-metric="reward">Mean reward</button>
+      <button data-metric="crash">Crash rate</button>
+      <button data-metric="finish">Row completion</button>
+      <button data-metric="alt">Mean |altitude error|</button>
+    </div>
+
+    <div class="card">
+      <div class="metric-panel active" data-panel="reward">
+        <div class="metric-title">Mean episode reward (higher / less negative is better)</div>
+        <div class="metric-sub">20 episodes each · current reward weights are untuned placeholders</div>
+        <div class="bar-row">
+          <div class="bar-name">Altitude-hold</div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:100%" data-tip="±192.55 std">
+            <span class="bar-value">−323.80</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-name">Random</div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:80.3%" data-tip="±198.14 std">
+            <span class="bar-value">−260.05</span></div></div>
+        </div>
+        <div class="target-pill">Target → improves toward zero as the row gets completed, not just "less negative"</div>
+        <div class="callout warning">
+          <span class="icon">⚠️</span>
+          <p><strong>Counter-intuitive finding, worth flagging to the professor directly.</strong> Random <em>scores better</em> on raw reward despite crashing 95% of the time — because altitude-hold survives the full 500-step episode accumulating small lateral-drift penalties, while a crash ends the episode (and the −20 penalty) early. This is a reward-scale artifact, not a real advantage for random. It's the concrete evidence for the new progress term (w5) and the reward rework due Sun 27 Sep, before any training run means anything.</p>
+        </div>
+      </div>
+
+      <div class="metric-panel" data-panel="crash">
+        <div class="metric-title">Crash rate (lower is better)</div>
+        <div class="metric-sub">20 episodes each</div>
+        <div class="bar-row">
+          <div class="bar-name">Altitude-hold</div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:1%" data-tip="0 of 20 episodes">
+            <span class="bar-value">0%</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-name">Random</div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:95%" data-tip="19 of 20 episodes">
+            <span class="bar-value">95%</span></div></div>
+        </div>
+        <div class="target-pill">Target → low single digits, without also trending toward zero forward progress</div>
+      </div>
+
+      <div class="metric-panel" data-panel="finish">
+        <div class="metric-title">Row completion rate (higher is better)</div>
+        <div class="metric-sub">20 episodes each</div>
+        <div class="bar-row">
+          <div class="bar-name">Altitude-hold</div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:1%" data-tip="0 of 20 episodes">
+            <span class="bar-value">0%</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-name">Random</div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:5%" data-tip="1 of 20 episodes">
+            <span class="bar-value">5%</span></div></div>
+        </div>
+        <div class="target-pill">Target → consistently high; neither baseline is designed to move forward at all</div>
+      </div>
+
+      <div class="metric-panel" data-panel="alt">
+        <div class="metric-title">Mean |altitude error| in metres (lower is better)</div>
+        <div class="metric-sub">20 episodes each</div>
+        <div class="bar-row">
+          <div class="bar-name">Altitude-hold</div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:7.4%" data-tip="0.013 m">
+            <span class="bar-value">0.013 m</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-name">Random</div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:100%" data-tip="0.175 m">
+            <span class="bar-value">0.175 m</span></div></div>
+        </div>
+        <div class="target-pill">Target → comparable to altitude-hold's precision, while also tracking the centreline and progressing</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tools">
+    <div class="section-head"><span class="section-num">04</span><h2>RL tools to achieve the outcome</h2></div>
+    <p>The pipeline from physics to a trained policy, in order. Click a stage for the library and the theory behind it.</p>
+
+    <div class="steps" id="steps">
+      <div class="step">
+        <button class="step-header"><span class="n">1</span><span class="title">Physics simulation</span><span class="phase built">Built</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner"><span class="lib">MuJoCo</span> (rigid-body dynamics + contact solver) running the <span class="lib">Skydio X2</span> quadrotor model from Google DeepMind's <span class="lib">mujoco_menagerie</span> (Apache-2.0). Gives us realistic thrust, drag and tilt dynamics without deriving the equations of motion ourselves. It does not model rotor ground effect or canopy turbulence, which we state as a limitation.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">2</span><span class="title">Environment API</span><span class="phase built">Built · rework by 27 Sep</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner"><span class="lib">Gymnasium</span> standardises <code>reset()</code> / <code>step()</code> / observation &amp; action spaces so any RL library plugs in. Registered as <code>AgroDrone-v0</code> (14-dim observation, 16 of 16 sanity tests pass). Juan delivers steps 3–5 in three small versions — v1 (action wrapper, reward, L0) on <strong>Sun 27 Sep</strong>, v2 (L1–L2) on Fri 2 Oct, v3 (L3–L4) on Fri 9 Oct — each frozen after review so all three algorithms train on one identical environment.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">3</span><span class="title">High-level action interface</span><span class="phase todo">Due Sun 27 Sep</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner">The policy outputs 4 commands — <span class="lib">forward velocity, lateral velocity, climb rate, yaw rate</span>. A fixed, non-learned <span class="lib">inner PD attitude/rate controller</span> turns them into the four rotor thrusts. Why: learning to hover from raw motor commands is a much harder sub-problem than the one we are studying. Today the repo still exposes raw per-rotor thrust. Owner: Juan.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">4</span><span class="title">Reward design</span><span class="phase todo">Redesign · 27 Sep</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner">One reward shared by all three algorithms: <code>−(w1·height² + w2·lateral² + w3·tilt² + w4·action²) + w5·Δs_along_row + survival − crash + completion</code>. Squared errors punish big deviations harder; <span class="lib">w5</span> rewards progress along the row so hovering in place is not a degenerate optimum (today's absolute-error reward allows it, see Section 3). Weights stay configurable for sensitivity analysis. Owner: Juan.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">5</span><span class="title">Difficulty levels L0–L4</span><span class="phase todo">L0 27 Sep · L1–L4 by 9 Oct</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner"><span class="lib">L0</span> no wind, on the row, altitude hold · <span class="lib">L1</span> no wind, offset spawn, row following · <span class="lib">L2</span> steady lateral wind · <span class="lib">L3</span> gusting wind · <span class="lib">L4</span> gusting wind with free yaw. Fixed before tuning and never adjusted per algorithm; results are the highest level each one clears plus the samples needed. Owner: Juan.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">6</span><span class="title">Hand-coded baselines</span><span class="phase built">Built &amp; evaluated</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner">A <span class="lib">PD controller</span> for altitude-hold, and uniform random sampling as the floor. They define the gap a learned policy has to close (Section 3). Re-run after the env freeze so they are expressed in the new action space.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">7</span><span class="title">Three policy-gradient algorithms</span><span class="phase todo">Not started</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner">Same environment, reward and Gaussian policy head for continuous actions. <span class="lib">REINFORCE</span> (Juan): Monte-Carlo policy gradient — simple but high variance. <span class="lib">A2C</span> (Panzhao): adds a learned critic as baseline to cut variance. <span class="lib">PPO</span> (Nelkit): clipped objective keeps each update near the previous policy, with <span class="lib">GAE</span> for advantages. We expect REINFORCE to struggle; that is a valid comparative finding.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">8</span><span class="title">Implementation</span><span class="phase todo">Code due 25–28 Sep</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner">PPO uses <span class="lib">CleanRL's single-file ppo_continuous_action.py</span> copied into the repo, because the pip <code>cleanrl</code> 0.4.8 wrapper fails on import. REINFORCE and A2C are written directly in <span class="lib">PyTorch</span> following the subject's policy-gradient content. Each runs one L0 episode without crashing by Fri 2 Oct.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">9</span><span class="title">Compute and monitoring</span><span class="phase todo">Verify by Sat 26 Sep</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner">Training runs on <span class="lib">AWS SageMaker</span>, with <span class="lib">Google Colab</span> as fallback. <span class="lib">TensorBoard</span> gives live curves, <span class="lib">Matplotlib</span> the report figures, and everything is consolidated into one Colab notebook for the demo. None of this is set up in the repo yet.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">10</span><span class="title">Evaluation harness</span><span class="phase progress">Built · extend by 14 Oct</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner"><span class="lib">evaluate_policy.py</span> runs seeded episodes and reports reward, crash rate, completion and altitude error. Still to add (Panzhao): multi-seed runs, per-level results, training stability, sample efficiency and the REINFORCE vs A2C vs PPO comparison charts.</div></div>
+      </div>
+      <div class="step">
+        <button class="step-header"><span class="n">11</span><span class="title">Fallback — reduce scope inside 3D</span><span class="phase contingency">Decide Fri 9 Oct</span><span class="chev">›</span></button>
+        <div class="step-body"><div class="step-body-inner">If an algorithm shows no upward reward trend within 1M steps: reuse the furthest-along algorithm's validated weights, cut tuning cycles, and ease the task (weaker wind, fixed yaw, closer spawn, wind curriculum). We do not switch environment or algorithm family. Last resort: demo altitude-hold flying in 3D, reported honestly.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="state">
+    <div class="section-head"><span class="section-num">05</span><h2>Current state</h2></div>
+    <p>An honest snapshot as of Thu 24 Sep 2026 — no results are overstated. Parts C (Mon 5 Oct), D (Mon 12 Oct) and E (Fri 23 Oct) are fixed; other dates are internal targets. Full plan: <a href="project_calendar.html">project_calendar.html</a>.</p>
+
+    <div class="key-dates">
+      <div class="kd"><div class="d">Sun 27 Sep</div><div class="t">Env v1 freeze (L0)</div></div>
+      <div class="kd"><div class="d">Fri 2 Oct</div><div class="t">Stage 1 gate + Part C pack</div></div>
+      <div class="kd due"><div class="d">Mon 5 Oct</div><div class="t">Part C due</div></div>
+      <div class="kd"><div class="d">Fri 9 Oct</div><div class="t">Stage 2 gate + Part D pack</div></div>
+      <div class="kd due"><div class="d">Mon 12 Oct</div><div class="t">Part D due</div></div>
+      <div class="kd"><div class="d">Sun 18 Oct</div><div class="t">Experiment freeze</div></div>
+      <div class="kd due"><div class="d">Fri 23 Oct</div><div class="t">Part E due, 23:59</div></div>
+    </div>
+
+    <div class="filter-bar" id="statusFilter">
+      <button class="active" data-filter="all">All</button>
+      <button data-filter="done">Done</button>
+      <button data-filter="progress">In progress</button>
+      <button data-filter="pending">Not started</button>
+    </div>
+
+    <div class="status-list" id="statusList">
+      <div class="status-item" data-status="done">
+        <span class="dot good"></span>
+        <div class="txt"><div class="t">Environment built &amp; tested</div><div class="d"><code>AgroDrone-v0</code> registered; 16 of 16 sanity tests pass. Rework starts now (below).</div></div>
+        <span class="badge done">Done</span>
+      </div>
+      <div class="status-item" data-status="done">
+        <span class="dot good"></span>
+        <div class="txt"><div class="t">Baselines implemented and evaluated</div><div class="d">Real numbers, 20 episodes each (Section 3). <b>Re-run after env v1 freeze, Sun 27 Sep.</b></div></div>
+        <span class="badge done">Done</span>
+      </div>
+      <div class="status-item" data-status="progress">
+        <span class="dot warn"></span>
+        <div class="txt"><div class="t">Evaluation harness</div><div class="d">Works for one policy. <b>Extend by Wed 14 Oct:</b> multi-seed, per-level, sample cost, comparison charts (Panzhao)</div></div>
+        <span class="badge progress">In progress</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">High-level action space + inner PD</div><div class="d"><b>Due Sun 27 Sep</b> · Juan · today it is still raw per-rotor thrust</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">Reward v1 (squared errors + w5 progress)</div><div class="d"><b>Due Sun 27 Sep</b> · Juan · today: absolute errors, no progress term, hardcoded weights</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">Difficulty levels L0–L4</div><div class="d"><b>L0 Sun 27 Sep, L1–L2 Fri 2 Oct, L3–L4 Fri 9 Oct</b> · Juan · today: only a wind_strength setting</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">PPO (CleanRL script copied into repo)</div><div class="d"><b>Code Fri 25 Sep</b> · Nelkit · the pip wrapper fails on import (cleanrl 0.4.8)</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">REINFORCE</div><div class="d"><b>Code Mon 28 Sep</b> · Juan</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">A2C</div><div class="d"><b>Code Sun 27 Sep</b> · Panzhao</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">Stage 1: three L0 training curves</div><div class="d"><b>Gate Fri 2 Oct</b> · zero training runs so far</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">Cloud compute (SageMaker / Colab)</div><div class="d"><b>Verify by Sat 26 Sep</b> · not set up in the repo</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">Viewer with three trained policies</div><div class="d"><b>Thu 15 Oct</b> · Nelkit (proposed) · today it only drives the two baselines</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">Parts C and D packs</div><div class="d"><b>Part C due Mon 5 Oct (pack ready Fri 2 Oct) · Part D due Mon 12 Oct (pack ready Fri 9 Oct)</b></div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+      <div class="status-item" data-status="pending">
+        <span class="dot pending"></span>
+        <div class="txt"><div class="t">Part E report</div><div class="d"><b>Draft Mon 19 Oct · submit Fri 23 Oct</b> (due 23:59)</div></div>
+        <span class="badge pending">Not started</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  AgriFlight-RL — Team LMF (Let Me Fly) — 43008 Reinforcement Learning, Assignment 3. Aligned to the Part B plan and the repo as of Thu 24 Sep 2026. Baseline figures measured via <code>evaluate_policy.py</code>, 20 episodes, seeds 0–19.
+</footer>
+
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('agroflight-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  } catch (e) {}
+
+  var toggle = document.getElementById('themeToggle');
+  toggle.addEventListener('click', function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('agroflight-theme', next); } catch (e) {}
+  });
+
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var sections = tabs.map(function (t) { return document.getElementById(t.dataset.target); });
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.getElementById(tab.dataset.target).scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        var idx = sections.indexOf(entry.target);
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        if (idx !== -1) tabs[idx].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  sections.forEach(function (s) { if (s) observer.observe(s); });
+
+  var nodeData = {
+    state: {
+      color: 'blue',
+      title: 'State — 14 dimensions',
+      body: 'alt_error, lateral_offset, orientation quaternion (4), linear velocity (3), angular velocity (3), wind (2). Wind is given directly to the agent — a deliberate simplification (fully observed MDP, not partially observed) worth naming as a design choice if asked.'
+    },
+    policy: {
+      color: 'violet',
+      title: 'Policy — one network shape, three trainers',
+      body: 'A neural network maps the 14-dim state to a Gaussian distribution over the 4 high-level commands. Three teammates train it with different policy-gradient methods on the same environment and reward: PPO (Nelkit), REINFORCE (Juan), A2C (Panzhao). Nothing has been trained yet.'
+    },
+    action: {
+      color: 'orange',
+      title: 'Action — 4 high-level commands',
+      body: 'Desired forward velocity, lateral velocity, climb rate and yaw rate. A fixed, non-learned inner PD attitude/rate controller converts them into the four rotor thrusts the Skydio X2 expects. Not built yet: the repo still exposes raw per-rotor thrust deltas (due Sun 27 Sep).'
+    },
+    env: {
+      color: 'green',
+      title: 'Physics — MuJoCo + wind model',
+      body: 'The Skydio X2 quadrotor (Google DeepMind mujoco_menagerie) simulated in MuJoCo, plus a slowly-varying random wind gust applied as a lateral/vertical force on the drone body — the disturbance the policy has to learn to reject.'
+    },
+    reward: {
+      color: 'blue',
+      title: 'Reward — planned vs current',
+      body: 'Planned, shared by all three algorithms: −(w1·height² + w2·lateral² + w3·tilt² + w4·action²) + w5·progress along the row + survival bonus − crash penalty + completion bonus. The code still has the placeholder: −1.0·|alt_error| − 1.0·|lateral_offset| − 0.5·tilt − 0.01·Σ(action²) + 0.05, ±20. Section 3 shows why it must change.'
+    }
+  };
+
+  var detail = document.getElementById('nodeDetail');
+  var nodeButtons = Array.prototype.slice.call(document.querySelectorAll('.node'));
+  function showNode(key) {
+    nodeButtons.forEach(function (b) { b.classList.toggle('active', b.dataset.node === key); });
+    var d = nodeData[key];
+    detail.innerHTML = '<div class="card"><span class="tag">' + d.title.split(' — ')[0] + '</span><h3 style="margin-top:4px;font-size:1rem;">' + d.title + '</h3><p style="margin-top:8px;">' + d.body + '</p></div>';
+  }
+  nodeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () { showNode(btn.dataset.node); });
+  });
+  showNode('state');
+
+  var mToggle = document.getElementById('metricToggle');
+  mToggle.addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    Array.prototype.slice.call(mToggle.children).forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('.metric-panel').forEach(function (p) {
+      p.classList.toggle('active', p.dataset.panel === btn.dataset.metric);
+    });
+  });
+
+  document.getElementById('steps').addEventListener('click', function (e) {
+    var header = e.target.closest('.step-header');
+    if (!header) return;
+    header.parentElement.classList.toggle('open');
+  });
+
+  var filterBar = document.getElementById('statusFilter');
+  filterBar.addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    Array.prototype.slice.call(filterBar.children).forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var f = btn.dataset.filter;
+    document.querySelectorAll('#statusList .status-item').forEach(function (item) {
+      item.style.display = (f === 'all' || item.dataset.status === f) ? 'flex' : 'none';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
