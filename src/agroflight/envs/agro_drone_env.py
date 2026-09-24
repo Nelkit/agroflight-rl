@@ -4,15 +4,17 @@ AgroDroneEnv -- Gymnasium environment for the crop-row flight-control task.
 Physics: MuJoCo Skydio X2 quadrotor (Google DeepMind mujoco_menagerie,
 Apache-2.0, https://github.com/google-deepmind/mujoco_menagerie).
 
-Task: the agent controls 4 rotor thrust deltas to keep the drone flying at a
-target altitude directly above a crop row (the world x-axis), while a
-slowly-varying random wind gust pushes it sideways, and to make progress
-down the row.
+Task: the agent flies the drone at a target altitude directly above a crop row
+(the world x-axis), while a slowly-varying random wind gust pushes it sideways,
+and makes progress down the row.
 
-State (13-dim), action (4-dim) and reward are unchanged from the exploration
-prototype. The reward weights in particular are the ILLUSTRATIVE MVP values
-and have NOT been validated to produce good flying behaviour when trained --
-tuning them is the team's work, not scaffolding. See the TODO block in step().
+Observation: 14-dim. Action: 4 normalised high-level commands in [-1, 1]
+(forward velocity, lateral velocity, climb rate, yaw rate). A fixed inner
+controller (inner_controller.py) turns them into rotor thrusts, so the policy
+never has to learn to hover from raw motor commands (Part B design).
+
+The reward is still the ILLUSTRATIVE placeholder from the exploration
+prototype and has NOT been validated for training. See the TODO block in step().
 """
 import os
 
@@ -20,6 +22,8 @@ import gymnasium as gym
 import mujoco
 import numpy as np
 from gymnasium import spaces
+
+from agroflight.envs.inner_controller import InnerController
 
 # Body name of the drone's free-floating root in the Skydio X2 model. Used to
 # resolve the body id for wind forces instead of assuming an index.
@@ -39,6 +43,10 @@ OBS_DIM = sum(size for _, size in OBS_LAYOUT)  # 14
 # Index of the vertical linear-velocity component inside the observation
 # vector (alt_error, lateral_offset, quat[4] -> linvel starts at 6, vz at 8).
 OBS_IDX_VZ = 8
+
+# Normalised action in [-1, 1] -> physical command for the inner controller:
+# forward velocity (m/s), lateral velocity (m/s), climb rate (m/s), yaw rate (rad/s).
+ACTION_SCALE = np.array([2.0, 1.0, 1.0, 1.0])
 
 
 def _resolve_xml_path(xml_path):
@@ -60,7 +68,8 @@ class AgroDroneEnv(gym.Env):
     metadata = {"render_modes": []}
 
     def __init__(self, xml_path=None, target_altitude=1.2, field_length=8.0,
-                 wind_strength=0.6, max_steps=500, seed=None):
+                 wind_strength=0.6, max_steps=1000, seed=None,
+                 frame_skip=1, yaw_free=False):
         super().__init__()
         self.model = mujoco.MjModel.from_xml_path(_resolve_xml_path(xml_path))
         self.data = mujoco.MjData(self.model)
@@ -69,6 +78,8 @@ class AgroDroneEnv(gym.Env):
         self.field_length = field_length
         self.wind_strength = wind_strength
         self.max_steps = max_steps
+        self.frame_skip = frame_skip
+        self.yaw_free = yaw_free
 
         # BUGFIX (was `xfrc_applied[1]`): the prototype hardcoded body index 1
         # as the drone. That only holds when the drone body happens to be the
@@ -78,13 +89,14 @@ class AgroDroneEnv(gym.Env):
         # (e.g. a stripped-down test model).
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, DRONE_BODY_NAME)
         self._drone_body_id = body_id if body_id != -1 else 1
+        self.controller = InnerController(self.model, self._drone_body_id)
 
         # hover thrust per rotor, read straight from the model's own "hover" keyframe
         self.hover_ctrl = self.model.key_ctrl[0].copy()
         self.ctrl_range = self.model.actuator_ctrlrange.copy()  # shape (4, 2)
 
-        # action = delta thrust per rotor, centered on hover (action=0 -> hold hover)
-        self.action_space = spaces.Box(low=-3.0, high=3.0, shape=(4,), dtype=np.float32)
+        # action = normalised [forward vel, lateral vel, climb rate, yaw rate]; 0 -> hold position
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
         # observation: [alt_error, lateral_offset, quat(4), linvel(3), angvel(3), wind(2)]
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(OBS_DIM,), dtype=np.float32
@@ -143,11 +155,13 @@ class AgroDroneEnv(gym.Env):
 
     def step(self, action):
         action = np.clip(action, self.action_space.low, self.action_space.high)
-        ctrl = np.clip(self.hover_ctrl + action, self.ctrl_range[:, 0], self.ctrl_range[:, 1])
-        self.data.ctrl[:] = ctrl
+        cmd = action * ACTION_SCALE
 
         self._apply_wind()
-        mujoco.mj_step(self.model, self.data)
+        for _ in range(self.frame_skip):
+            self.data.ctrl[:] = self.controller.thrusts(
+                self.data.qpos, self.data.qvel, cmd, self.yaw_free)
+            mujoco.mj_step(self.model, self.data)
         self._steps += 1
 
         pos = self.data.qpos[0:3]

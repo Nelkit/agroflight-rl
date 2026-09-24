@@ -203,6 +203,47 @@ def test_hover_holds_altitude_for_short_rollout():
         env.close()
 
 
+def test_forward_command_is_tracked():
+    """Wiring check for the inner controller: a forward command produces forward speed."""
+    env = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0)
+    try:
+        env.reset(seed=0)
+        action = np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float32)  # full forward = 2 m/s
+        for _ in range(200):
+            obs, _, terminated, _, _ = env.step(action)
+            assert not terminated
+        assert abs(obs[6] - 2.0) < 0.3, f"forward speed {obs[6]:.2f} m/s, expected ~2.0"
+    finally:
+        env.close()
+
+
+def test_climb_command_raises_altitude():
+    env = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0)
+    try:
+        obs, _ = env.reset(seed=0)
+        start = obs[0]
+        for _ in range(100):
+            obs, _, _, _, _ = env.step(np.array([0.0, 0.0, 0.5, 0.0], dtype=np.float32))
+        assert obs[0] - start > 0.2
+    finally:
+        env.close()
+
+
+def test_yaw_is_held_unless_yaw_free():
+    def final_yaw_rate(yaw_free):
+        e = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0, yaw_free=yaw_free)
+        try:
+            e.reset(seed=0)
+            for _ in range(200):
+                obs, _, _, _, _ = e.step(np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32))
+            return obs[11]
+        finally:
+            e.close()
+
+    assert abs(final_yaw_rate(False)) < 0.05
+    assert abs(final_yaw_rate(True) - 1.0) < 0.2
+
+
 def test_wind_is_zero_when_wind_strength_is_zero(env):
     """The wind channel of the observation must actually respect the setting."""
     e = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0)

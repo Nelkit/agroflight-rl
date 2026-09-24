@@ -65,11 +65,15 @@ on the **y = 0** centreline.
 Wind is observable, so this is a fully-observed MDP rather than a POMDP. That
 was a prototype choice, not a validated one — see the TODOs.
 
-### Action space — `Box(-3.0, 3.0, (4,), float32)`
+### Action space — `Box(-1.0, 1.0, (4,), float32)`
 
-Per-rotor **thrust deltas** relative to the model's own `hover` keyframe, so
-`action = [0,0,0,0]` means "hold hover thrust". The resulting control is
-clipped to the actuator's `ctrlrange` before reaching MuJoCo.
+Four **normalised high-level commands**: forward velocity, lateral velocity,
+climb rate, yaw rate. `ACTION_SCALE` maps them to ±2 m/s, ±1 m/s, ±1 m/s and
+±1 rad/s, expressed in the drone's heading frame. `action = [0,0,0,0]` means
+"hold position". A fixed, non-learned inner controller
+(`envs/inner_controller.py`: velocity loop, attitude PD, thrust mixer) turns
+the commands into the four rotor thrusts, so the policy never has to learn to
+hover from raw motor commands. Yaw is held at 0 unless `yaw_free=True` (L4).
 
 ### Reward
 
@@ -94,7 +98,7 @@ reward = −1.0 · |alt_error|
 | --------- | ---- | ---- |
 | `z < 0.08` or `tilt > 1.2 rad` | `crashed` | terminated |
 | `x ≥ field_length` | `finished_row` | terminated |
-| `steps ≥ max_steps` (default 500) | — | truncated |
+| `steps ≥ max_steps` (default 1000) | — | truncated |
 
 ### Configuration
 
@@ -103,7 +107,9 @@ reward = −1.0 · |alt_error|
 | `target_altitude` | `1.2` | Target flight height (m) |
 | `field_length` | `8.0` | Row length before completion (m) |
 | `wind_strength` | `0.6` | Max wind force magnitude (set `0.0` to disable) |
-| `max_steps` | `500` | Truncation limit |
+| `max_steps` | `1000` | Truncation limit (10 s at `dt = 0.01`) |
+| `frame_skip` | `1` | Physics steps per action |
+| `yaw_free` | `False` | Let the policy command yaw rate |
 | `seed` | `None` | RNG seed for wind and start offset |
 
 ---
@@ -166,7 +172,7 @@ the gap a learned policy has to close.
 
 ```
 src/agroflight/
-  envs/            AgroDroneEnv, Gymnasium registration, plantation scene builder
+  envs/            AgroDroneEnv, inner controller, Gymnasium registration, plantation scene builder
   baselines/       altitude_hold, random controllers
   training/        CleanRL PPO entry point
   evaluation/      baseline + checkpoint evaluation

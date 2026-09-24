@@ -1,10 +1,9 @@
 """Random-action baseline (sanity-check floor: expect a quick crash)."""
 import numpy as np
 
-# Scale factor carried over from the prototype's env-module version: the raw
-# action space is [-3, 3] per rotor, which flips the drone almost instantly;
-# scaling down keeps the baseline in the air long enough to be a meaningful
-# lower bound rather than an immediate crash.
+# Scale factor carried over from the prototype: full-range random commands make
+# the drone thrash; scaling down keeps the baseline in the air long enough to
+# be a meaningful lower bound rather than an immediate crash.
 DEFAULT_SCALE = 0.3
 
 
