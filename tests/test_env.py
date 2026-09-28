@@ -203,6 +203,128 @@ def test_hover_holds_altitude_for_short_rollout():
         env.close()
 
 
+def test_forward_command_is_tracked():
+    """Wiring check for the inner controller: a forward command produces forward speed."""
+    env = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0)
+    try:
+        env.reset(seed=0)
+        action = np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float32)  # full forward = 2 m/s
+        for _ in range(200):
+            obs, _, terminated, _, _ = env.step(action)
+            assert not terminated
+        assert abs(obs[6] - 2.0) < 0.3, f"forward speed {obs[6]:.2f} m/s, expected ~2.0"
+    finally:
+        env.close()
+
+
+def test_climb_command_raises_altitude():
+    env = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0)
+    try:
+        obs, _ = env.reset(seed=0)
+        start = obs[0]
+        for _ in range(100):
+            obs, _, _, _, _ = env.step(np.array([0.0, 0.0, 0.5, 0.0], dtype=np.float32))
+        assert obs[0] - start > 0.2
+    finally:
+        env.close()
+
+
+def test_yaw_is_held_unless_yaw_free():
+    def final_yaw_rate(yaw_free):
+        e = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0, yaw_free=yaw_free)
+        try:
+            e.reset(seed=0)
+            for _ in range(200):
+                obs, _, _, _, _ = e.step(np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32))
+            return obs[11]
+        finally:
+            e.close()
+
+    assert abs(final_yaw_rate(False)) < 0.05
+    assert abs(final_yaw_rate(True) - 1.0) < 0.2
+
+
+FORWARD = np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float32)
+HOLD = np.zeros(ACTION_DIM, dtype=np.float32)
+
+
+def test_invalid_level_raises():
+    with pytest.raises(ValueError, match="level"):
+        AgroDroneEnv(xml_path=MODEL_XML, level=7)
+
+
+def test_level0_is_altitude_hold_only():
+    env = AgroDroneEnv(xml_path=MODEL_XML, level=0, seed=0)
+    try:
+        obs, _ = env.reset(seed=0)
+        assert abs(obs[1]) < 1e-9, "L0 must spawn on the row"
+        for _ in range(500):
+            obs, _, terminated, _, info = env.step(FORWARD)
+            np.testing.assert_allclose(obs[12:14], 0.0, atol=1e-9)
+            assert not terminated and not info["finished_row"]
+        assert info["x"] > env.field_length, "row completion must be off at L0"
+    finally:
+        env.close()
+
+
+def test_level1_finishes_the_row():
+    env = AgroDroneEnv(xml_path=MODEL_XML, level=1, seed=0)
+    try:
+        env.reset(seed=0)
+        for _ in range(env.max_steps):
+            _, _, terminated, truncated, info = env.step(FORWARD)
+            if terminated or truncated:
+                break
+        assert info["finished_row"]
+    finally:
+        env.close()
+
+
+def test_level2_wind_is_steady_and_lateral():
+    env = AgroDroneEnv(xml_path=MODEL_XML, level=2, seed=0)
+    try:
+        obs, _ = env.reset(seed=0)
+        first = obs[12]
+        assert first != 0.0 and obs[13] == 0.0
+        for _ in range(50):
+            obs, _, _, _, _ = env.step(HOLD)
+            assert obs[12] == first and obs[13] == 0.0
+    finally:
+        env.close()
+
+
+def test_completing_the_row_beats_hovering_in_place():
+    """Part B design rule: the progress term and completion bonus must dominate
+    the survival bonus, so hovering is not a degenerate optimum."""
+    def total_reward(action):
+        e = AgroDroneEnv(xml_path=MODEL_XML, level=1, seed=0)
+        try:
+            e.reset(seed=0)
+            total = 0.0
+            for _ in range(e.max_steps):
+                _, r, terminated, truncated, _ = e.step(action)
+                total += r
+                if terminated or truncated:
+                    break
+            return total
+        finally:
+            e.close()
+
+    assert total_reward(FORWARD) > total_reward(HOLD)
+
+
+def test_reward_weights_are_configurable():
+    def first_reward(cfg):
+        e = AgroDroneEnv(xml_path=MODEL_XML, level=1, seed=0, reward_config=cfg)
+        try:
+            e.reset(seed=0)
+            return e.step(HOLD)[1]
+        finally:
+            e.close()
+
+    assert first_reward(dict(survival_bonus=1.0)) - first_reward(None) == pytest.approx(0.98)
+
+
 def test_wind_is_zero_when_wind_strength_is_zero(env):
     """The wind channel of the observation must actually respect the setting."""
     e = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0)

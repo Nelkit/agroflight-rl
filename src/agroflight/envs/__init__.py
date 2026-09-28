@@ -9,10 +9,14 @@ or pass `xml_path=` explicitly to `gym.make`.
 from gymnasium.envs.registration import register, registry
 
 from agroflight.envs.agro_drone_env import (
+    ACTION_SCALE,
+    DEFAULT_LEVEL,
+    LEVELS,
     OBS_DIM,
     OBS_IDX_VZ,
     OBS_LAYOUT,
     AgroDroneEnv,
+    RewardConfig,
 )
 from agroflight.envs.scene_builder import build_plantation_scene
 
@@ -32,13 +36,17 @@ if ENV_ID not in registry:
         # TimeLimit is the value CleanRL's rollout length is matched against.
         # TODO (team): keep this in sync with `num_steps` in the training config
         # if you change the episode length.
-        max_episode_steps=500,
+        max_episode_steps=1000,
     )
 
 __all__ = [
     "AgroDroneEnv",
     "build_plantation_scene",
     "ENV_ID",
+    "ACTION_SCALE",
+    "DEFAULT_LEVEL",
+    "LEVELS",
+    "RewardConfig",
     "OBS_DIM",
     "OBS_IDX_VZ",
     "OBS_LAYOUT",

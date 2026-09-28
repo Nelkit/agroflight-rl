@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Four Weeks to Part E</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🚁%3C/text%3E%3C/svg%3E">
+<meta name="description" content="AgriFlight-RL (AT3): honest coverage against Part B and a four-week calendar to the Part E deadline on 23 Oct 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light;
+    --bg: #EEF0F2;
+    --surface: #FFFFFF;
+    --surface-soft: #E4E7EA;
+    --ink: #1E2328;
+    --ink-soft: #4B535B;
+    --ink-faint: #7A828A;
+    --line: rgba(30,35,40,0.14);
+    --bronze: #8C5A2B;
+    --bronze-soft: rgba(140,90,43,0.12);
+    --silver: #4A7A5E;
+    --silver-soft: rgba(74,122,94,0.12);
+    --gold: #93691C;
+    --gold-soft: rgba(147,105,28,0.14);
+    --accent: #2B5A82;
+    --accent-soft: rgba(43,90,130,0.10);
+    --danger: #b3402f;
+    --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+    --font-sans: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --bg: #14171A; --surface: #1C2023; --surface-soft: #24292D;
+      --ink: #E9EBEC; --ink-soft: #A7AFB6; --ink-faint: #7C848B;
+      --line: rgba(233,235,236,0.14);
+      --bronze: #CC9358; --bronze-soft: rgba(204,147,88,0.14);
+      --silver: #6FBF95; --silver-soft: rgba(111,191,149,0.14);
+      --gold: #DDAE55; --gold-soft: rgba(221,174,85,0.16);
+      --accent: #79B6DA; --accent-soft: rgba(121,182,218,0.14);
+      --danger: #e2806f;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg: #14171A; --surface: #1C2023; --surface-soft: #24292D;
+    --ink: #E9EBEC; --ink-soft: #A7AFB6; --ink-faint: #7C848B;
+    --line: rgba(233,235,236,0.14);
+    --bronze: #CC9358; --bronze-soft: rgba(204,147,88,0.14);
+    --silver: #6FBF95; --silver-soft: rgba(111,191,149,0.14);
+    --gold: #DDAE55; --gold-soft: rgba(221,174,85,0.16);
+    --accent: #79B6DA; --accent-soft: rgba(121,182,218,0.14);
+    --danger: #e2806f;
+  }
+
+  *{ box-sizing: border-box; }
+  [hidden]{ display:none !important; }
+  body{
+    margin:0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-sans); font-size:15px; line-height:1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--accent-soft); }
+  .wrap{ max-width:980px; margin:0 auto; padding:0 24px 72px; }
+
+  .hero{ padding:44px 0 32px; border-bottom:1px solid var(--line); }
+  .eyebrow{
+    display:flex; align-items:center; gap:10px; font-family: var(--font-mono);
+    font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color: var(--ink-faint); margin-bottom:14px; flex-wrap:wrap;
+  }
+  .eyebrow .dot{ width:6px; height:6px; background: var(--gold); border-radius:50%; flex:none; }
+  h1{
+    font-family: var(--font-display); font-weight:800;
+    font-size: clamp(2.2rem, 5vw, 3.4rem); line-height:0.98;
+    margin:0 0 14px; text-wrap: balance;
+  }
+  .lede{ font-size:1.05rem; color: var(--ink-soft); max-width:64ch; margin:0 0 26px; }
+  .lede strong{ color: var(--ink); font-weight:600; }
+
+  .stats{ display:grid; grid-template-columns: repeat(4,1fr); gap:1px; background: var(--line); border:1px solid var(--line); }
+  .stat{ background: var(--surface); padding:16px 12px; }
+  .stat .n{ font-family: var(--font-display); font-weight:700; font-size:1.9rem; color: var(--gold); font-variant-numeric: tabular-nums; line-height:1; }
+  .stat .l{ font-size:0.72rem; color: var(--ink-faint); margin-top:5px; line-height:1.3; }
+  @media (max-width:640px){ .stats{ grid-template-columns: repeat(2,1fr); } }
+
+  section{ padding:34px 0; border-bottom:1px solid var(--line); }
+  section:last-of-type{ border-bottom:none; }
+  .section-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:18px; }
+  .section-head .tag{ font-family: var(--font-mono); font-size:11px; letter-spacing:0.1em; color: var(--ink-faint); text-transform:uppercase; flex:none; }
+  h2{ font-family: var(--font-display); font-weight:700; font-size: clamp(1.35rem, 2.6vw, 1.7rem); margin:0; }
+  p{ margin:0 0 12px; max-width:68ch; }
+  p:last-child{ margin-bottom:0; }
+  code.inline{ font-family: var(--font-mono); font-size:0.86em; background: var(--surface-soft); padding:1px 6px; border-radius:3px; color: var(--ink); }
+  .note{ font-size:0.82rem; color: var(--ink-faint); }
+  .note strong{ color: var(--ink); font-weight:600; }
+
+  figure{ margin:20px 0 0; }
+  .figure-frame{ background: var(--surface); border:1px solid var(--line); padding:18px 18px 14px; }
+  figcaption{ margin-top:10px; font-size:0.82rem; color: var(--ink-faint); max-width:70ch; }
+
+  .legend{ display:flex; gap:18px; flex-wrap:wrap; font-family: var(--font-mono); font-size:10.5px; color: var(--ink-faint); margin-bottom:12px; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .legend i{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .legend i.sq{ border-radius:2px; }
+
+  .cov-row{ display:grid; grid-template-columns: minmax(150px, 250px) 1fr 46px; gap:12px; align-items:center; padding:7px 0; border-bottom:1px solid var(--line); }
+  .cov-row:last-child{ border-bottom:none; }
+  .cov-name{ font-size:0.86rem; font-weight:500; line-height:1.25; }
+  .cov-name small{ display:block; font-size:0.72rem; color: var(--ink-faint); font-weight:400; margin-top:1px; }
+  .cov-track{ height:14px; background: var(--surface-soft); position:relative; }
+  .cov-fill{ height:14px; background: var(--accent); }
+  .cov-fill.high{ background: var(--silver); }
+  .cov-fill.low{ background: var(--bronze); }
+  .cov-val{ font-family: var(--font-mono); font-size:11.5px; text-align:right; font-variant-numeric: tabular-nums; }
+  @media (max-width:640px){ .cov-row{ grid-template-columns: 1fr 46px; } .cov-track{ grid-column:1 / -1; order:3; } }
+
+  .findings{ display:grid; grid-template-columns: repeat(2,1fr); gap:14px; margin-top:18px; }
+  @media (max-width:640px){ .findings{ grid-template-columns:1fr; } }
+  .finding{ background: var(--surface); border:1px solid var(--line); padding:14px 16px; display:flex; gap:12px; }
+  .finding .num{ font-family: var(--font-display); font-weight:700; font-size:1.5rem; color: var(--gold); flex:none; min-width:30px; line-height:1.1; }
+  .finding .txt .k{ font-size:0.82rem; font-weight:600; color: var(--ink); margin-bottom:2px; }
+  .finding .txt .d{ font-size:0.8rem; color: var(--ink-soft); }
+
+  .cal-tools{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .filters{ display:flex; gap:6px; flex-wrap:wrap; }
+  .filters button{
+    font-family: var(--font-mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase;
+    background: var(--surface); color: var(--ink-soft); border:1px solid var(--line);
+    padding:5px 11px; border-radius:20px; cursor:pointer;
+  }
+  .filters button[aria-pressed="true"]{ background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .cal-scroll{ overflow-x:auto; }
+  .cal{ min-width:780px; display:grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap:1px; background: var(--line); border:1px solid var(--line); }
+  .cal-h{ background: var(--surface-soft); font-family: var(--font-mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color: var(--ink-faint); padding:6px 8px; }
+  .day{ background: var(--surface); min-height:112px; padding:6px 6px 8px; display:flex; flex-direction:column; gap:4px; }
+  .day.wknd{ background: color-mix(in srgb, var(--surface-soft) 55%, var(--surface)); }
+  .day.out{ background: var(--bg); opacity:0.5; }
+  .dn{ font-family: var(--font-mono); font-size:11px; color: var(--ink-faint); display:flex; justify-content:space-between; align-items:center; }
+  .day.today .dn b{ background: var(--gold); color: var(--surface); padding:0 6px; border-radius:10px; font-weight:600; }
+  .ev{
+    font-size:11px; line-height:1.25; padding:3px 6px; background: var(--surface-soft);
+    border-left:3px solid var(--ink-faint); border-radius:2px; color: var(--ink);
+  }
+  .ev.o-nelkit{ border-left-color: var(--accent); background: var(--accent-soft); }
+  .ev.o-juan{ border-left-color: var(--silver); background: var(--silver-soft); }
+  .ev.o-panzhao{ border-left-color: var(--bronze); background: var(--bronze-soft); }
+  .ev.ms{ border-left-color: var(--gold); background: var(--gold-soft); font-weight:600; }
+  .ev.due{ background: var(--ink); color: var(--surface); border-left-color: var(--gold); font-weight:600; }
+  .ev.hol{ background: transparent; border-left-style:dashed; color: var(--ink-faint); font-style:italic; }
+
+  .cards{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+  @media (max-width:720px){ .cards{ grid-template-columns:1fr; } }
+  .card{ background: var(--surface); border:1px solid var(--line); padding:16px; border-top:3px solid var(--ink-faint); }
+  .card.nelkit{ border-top-color: var(--accent); }
+  .card.juan{ border-top-color: var(--silver); }
+  .card.panzhao{ border-top-color: var(--bronze); }
+  .card .k{ font-family: var(--font-mono); font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color: var(--ink-faint); margin-bottom:6px; }
+  .card .stat-big{ font-family: var(--font-display); font-weight:700; font-size:1.25rem; margin-bottom:8px; }
+  .card ul{ margin:0; padding-left:18px; font-size:0.84rem; color: var(--ink-soft); }
+  .card li{ margin-bottom:3px; }
+
+  .subhead{ font-family: var(--font-display); font-weight:700; font-size:1.05rem; color: var(--accent); display:flex; align-items:center; gap:9px; margin:28px 0 12px; }
+  .subhead .swatch{ width:8px; height:8px; border-radius:50%; flex:none; background: var(--accent); }
+
+  .hyp-cards{ display:grid; grid-template-columns: repeat(2,1fr); gap:14px; }
+  @media (max-width:640px){ .hyp-cards{ grid-template-columns:1fr; } }
+  .hyp-card{ background: var(--surface); border:1px solid var(--line); padding:14px 16px; }
+  .hyp-card .hyp-name{ font-family: var(--font-display); font-weight:700; font-size:1rem; margin-bottom:6px; }
+  .hyp-card .hyp-row{ font-size:0.8rem; color: var(--ink-soft); margin-bottom:5px; }
+  .hyp-card .hyp-row strong{ color: var(--ink); font-weight:600; }
+  .pill{ display:inline-block; font-family: var(--font-mono); font-size:10px; letter-spacing:0.04em; text-transform:uppercase; padding:2px 8px; border-radius:20px; }
+  .pill.pending{ background: var(--surface-soft); color: var(--ink-faint); }
+  .pill.gate{ background: var(--gold-soft); color: var(--gold); }
+  .pill.warn{ background: rgba(179,64,47,0.12); color: var(--danger); }
+  .pill.done{ background: var(--silver-soft); color: var(--silver); }
+
+  .timeline{ position:relative; padding-left:22px; }
+  .timeline::before{ content:""; position:absolute; left:5px; top:4px; bottom:4px; width:1px; background: var(--line); }
+  .tl-item{ position:relative; padding-bottom:16px; }
+  .tl-item:last-child{ padding-bottom:0; }
+  .tl-item::before{ content:""; position:absolute; left:-22px; top:4px; width:9px; height:9px; border-radius:50%; background: var(--surface); border:2px solid var(--ink-faint); }
+  .tl-item.milestone::before{ border-color: var(--silver); background: var(--silver); }
+  .tl-item.now::before{ border-color: var(--gold); background: var(--gold); }
+  .tl-date{ font-family: var(--font-mono); font-size:10.5px; color: var(--ink-faint); letter-spacing:0.03em; }
+  .tl-text{ font-size:0.88rem; color: var(--ink); margin-top:2px; }
+  .tl-text strong{ font-weight:600; }
+
+  footer{ padding-top:26px; font-size:0.78rem; color: var(--ink-faint); max-width:72ch; }
+  footer p{ margin:0 0 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow"><span class="dot"></span>AT3 &middot; Team LMF &middot; plan as of Thu 24 Sep 2026</div>
+    <h1>Four Weeks to Part E</h1>
+    <p class="lede">
+      Parts A and B are in, and the environment Part B promised (high-level actions, a progress
+      reward, five wind levels) is now built and merged into main.
+      <strong>Nothing has been trained yet:</strong> the three algorithms are next. Part C is due <strong>Mon 5 Oct</strong>, Part D <strong>Mon 12 Oct</strong> and Part E
+      <strong>Fri 23 Oct</strong>. This is the plan to get there.
+    </p>
+    <div class="stats">
+      <div class="stat"><div class="n">11</div><div class="l">days to Part C (Mon 5 Oct); D Mon 12 Oct, E Fri 23 Oct</div></div>
+      <div class="stat"><div class="n">~30%</div><div class="l">of the A&ndash;E scope (60 pts) ready</div></div>
+      <div class="stat"><div class="n">~48%</div><div class="l">of Part B's technical scope built</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">training runs so far</div></div>
+    </div>
+  </header>
+
+  <section id="status">
+    <div class="section-head"><span class="tag">Status</span><h2>Where we honestly are</h2></div>
+    <p>Each row is one thing Part B promised, scored against what the repo on <code class="inline">main</code> holds today.</p>
+
+    <figure>
+      <div class="figure-frame">
+        <div class="legend">
+          <span><i class="sq" style="background:var(--silver)"></i> mostly done (80%+)</span>
+          <span><i class="sq" style="background:var(--accent)"></i> partial</span>
+          <span><i class="sq" style="background:var(--bronze)"></i> barely started</span>
+        </div>
+        <div id="coverage"></div>
+      </div>
+      <figcaption>Equal weight across the 12 commitments, so ~48% is the mean, and most of it is the environment: the hard, unfinished part is the three algorithms and the results. Points view of A&ndash;E: A 5 + B 5 + about 1 (C) + 3.5 (D) + 3 (E raw material) of 60 = ~30%. These are estimates, not measurements.</figcaption>
+    </figure>
+
+    <div class="findings">
+      <div class="finding">
+        <div class="num">1</div>
+        <div class="txt"><div class="k">The environment now matches Part B</div><div class="d">Inner controller, reward v1 and levels L0&ndash;L4 are merged into main with 25 passing tests. Changes to the action layout, reward weights or levels now go through the owner, so all three algorithms train on one identical env.</div></div>
+      </div>
+      <div class="finding">
+        <div class="num">2</div>
+        <div class="txt"><div class="k">The PPO wrapper still fails on import</div><div class="d">pip's <code class="inline">cleanrl</code> 0.4.8 is an old gym-era release (<code class="inline">Monitor</code> import error). The install no longer pulls it in. Still to do: vendor CleanRL's current single-file PPO script.</div></div>
+      </div>
+      <div class="finding">
+        <div class="num">3</div>
+        <div class="txt"><div class="k">Algorithms can start now</div><div class="d">The interface is fixed: 14 numbers in, 4 commands out, levels L0&ndash;L4. REINFORCE, A2C and PPO can be written and run at L0 today.</div></div>
+      </div>
+      <div class="finding">
+        <div class="num">4</div>
+        <div class="txt"><div class="k">A two-line controller finishes the row</div><div class="d">Forward 1.0, sideways = &minus;offset, altitude hold: 100% of held-out episodes finish at L1 to L4 (about 4 s, reward ~+96 at L3), while altitude-hold scores &minus;153 and random &minus;163. RL must be compared with this too, so a third baseline is proposed.</div></div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px;"><strong>Marks caveat from the brief:</strong> intermediate marks are awarded only after the project is complete, so A and B are submitted but not banked. Parts F (15) and G (25) also need the full project.</p>
+  </section>
+
+  <section id="calendar">
+    <div class="section-head"><span class="tag">Calendar</span><h2>Thu 24 Sep to Fri 23 Oct</h2></div>
+
+    <div class="cal-tools">
+      <div class="legend" style="margin:0;">
+        <span><i style="background:var(--accent)"></i> Nelkit</span>
+        <span><i style="background:var(--silver)"></i> Juan</span>
+        <span><i style="background:var(--bronze)"></i> Panzhao</span>
+        <span><i style="background:var(--ink-faint)"></i> whole team</span>
+        <span><i class="sq" style="background:var(--gold)"></i> gate / milestone</span>
+      </div>
+      <div class="filters" id="filters">
+        <button data-f="all" aria-pressed="true">All</button>
+        <button data-f="nelkit" aria-pressed="false">Nelkit</button>
+        <button data-f="juan" aria-pressed="false">Juan</button>
+        <button data-f="panzhao" aria-pressed="false">Panzhao</button>
+      </div>
+    </div>
+
+    <div class="cal-scroll"><div class="cal" id="cal"></div></div>
+    <p class="note" style="margin-top:10px;">Choosing a name shows that person's items plus the whole-team ones. Parts C (Mon 5 Oct), D (Mon 12 Oct) and E (Fri 23 Oct) are fixed; dates for F and G are not known yet. Mon 5 Oct is probably the NSW Labour Day holiday, so aim to submit Part C on Sun 4 Oct.</p>
+
+    <div class="subhead"><span class="swatch"></span>The five phases</div>
+    <div class="hyp-cards">
+      <div class="hyp-card">
+        <div class="hyp-name">0 &middot; Algorithm code on the merged env</div>
+        <div class="hyp-row"><strong>Thu 24 &ndash; Sun 27 Sep</strong></div>
+        <div class="hyp-row"><strong>Done when:</strong> REINFORCE, A2C and PPO code exist and each runs an L0 episode. Env v1 is already merged (Thu 24 Sep).</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-name">1 &middot; Stage 1: L0 and Part C</div>
+        <div class="hyp-row"><strong>Mon 28 Sep &ndash; Fri 2 Oct</strong> &middot; Part C due Mon 5 Oct</div>
+        <div class="hyp-row"><strong>Done when:</strong> each algorithm logs an L0 curve, the time per 1M steps is known, and the Part C pack is ready.</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-name">2 &middot; Stage 2: tune and compare</div>
+        <div class="hyp-row"><strong>Mon 5 &ndash; Fri 9 Oct</strong> &middot; Part D due Mon 12 Oct</div>
+        <div class="hyp-row"><strong>Done when:</strong> hyperparameters are fixed per algorithm at L1&ndash;L2 over 3 seeds, the fallback call is made and the Part D pack is ready.</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-name">3 &middot; Stage 3: final eval and demo</div>
+        <div class="hyp-row"><strong>Mon 12 &ndash; Sun 18 Oct</strong></div>
+        <div class="hyp-row"><strong>Done when:</strong> L3&ndash;L4 runs for anyone who cleared L2, fixed-seed evaluations, the comparison chart and viewer recordings exist, then experiments freeze.</div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-name">4 &middot; Part E report</div>
+        <div class="hyp-row"><strong>Mon 19 &ndash; Fri 23 Oct</strong></div>
+        <div class="hyp-row"><strong>Done when:</strong> the report is submitted (aim 17:00) with an agreed contribution table.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="owners">
+    <div class="section-head"><span class="tag">Owners</span><h2>Who owns what</h2></div>
+    <div class="cards">
+      <div class="card nelkit">
+        <div class="k">Nelkit</div>
+        <div class="stat-big">PPO + compute + viewer</div>
+        <ul>
+          <li>PPO via vendored CleanRL script</li>
+          <li>SageMaker / Colab access and runs</li>
+          <li>Viewer v2: three policies, same wind (proposed)</li>
+          <li>Consolidated Colab notebook</li>
+        </ul>
+      </div>
+      <div class="card juan">
+        <div class="k">Juan</div>
+        <div class="stat-big">Environment + REINFORCE</div>
+        <ul>
+          <li>Env v1 merged: inner controller, reward v1, levels L0&ndash;L4</li>
+          <li>REINFORCE (Gaussian policy, MC returns)</li>
+          <li>Cruise-and-centre baseline (proposed)</li>
+          <li>Part D (env / GUI design)</li>
+        </ul>
+      </div>
+      <div class="card panzhao">
+        <div class="k">Panzhao</div>
+        <div class="stat-big">A2C + evaluation</div>
+        <ul>
+          <li>A2C (actor + learned critic)</li>
+          <li>Eval harness: seeds, levels, sample cost</li>
+          <li>Comparison charts</li>
+          <li>Reviews env PRs within 24 hours</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note" style="margin-top:12px;"><strong>Why the environment has one owner:</strong> Juan's physics background suits the inner PD controller, and one designer keeps it consistent. Env v1 is merged, so it is now fixed: changes to the action layout, reward weights or levels go through Juan and get announced, otherwise the three-way comparison stops being fair. <strong>Shared:</strong> each writes the report section for their own algorithm, and everyone must be able to explain all three at the oral defence (25 pts, individually assessed), hence two cross-teaching sessions. Roles are a proposal: swap freely, and use one branch per person so contributions are visible in git.</p>
+  </section>
+
+  <section id="gates">
+    <div class="section-head"><span class="tag">Gates</span><h2>Decision points and what happens if we miss them</h2></div>
+    <div class="hyp-cards">
+      <div class="hyp-card">
+        <div class="hyp-name">Thu 24 Sep &middot; Env v1 merged</div>
+        <div class="hyp-row"><strong>Result:</strong> inner controller, reward v1 and levels L0&ndash;L4 are in main (PR #1), 25 tests pass. Levels are fixed before tuning (Part B).</div>
+        <div class="hyp-row"><strong>If it changes:</strong> announce it, since all three algorithms must train on one identical env.</div>
+        <div class="hyp-row"><span class="pill done">done</span></div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-name">Fri 2 Oct &middot; Stage 1 gate + Part C pack</div>
+        <div class="hyp-row"><strong>Rule:</strong> three L0 curves. If PPO cannot hold altitude with no wind, the fault is the env, not the algorithm (Part B).</div>
+        <div class="hyp-row"><strong>If missed:</strong> Part C reports baselines plus whatever L0 curves exist, honestly. Part B's two-week fallback trigger (about 21 Sep) has already passed.</div>
+        <div class="hyp-row"><span class="pill gate">gate</span></div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-name">Fri 9 Oct &middot; Stage 2 gate + Part D pack</div>
+        <div class="hyp-row"><strong>Rule:</strong> no upward reward trend within 1M steps means reduce scope, not switch environment (Part B). REINFORCE failing is a valid finding.</div>
+        <div class="hyp-row"><strong>If missed:</strong> reuse the furthest-along algorithm's validated weights, or ramp wind as a curriculum.</div>
+        <div class="hyp-row"><span class="pill gate">gate</span></div>
+      </div>
+      <div class="hyp-card">
+        <div class="hyp-name">Sun 18 Oct &middot; Experiment freeze</div>
+        <div class="hyp-row"><strong>Rule:</strong> no new runs after this; the report is written from what exists.</div>
+        <div class="hyp-row"><strong>If no usable policy:</strong> demo falls back to altitude-hold flying in 3D (Part B), reported honestly.</div>
+        <div class="hyp-row"><span class="pill warn">hard stop</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="progress">
+    <div class="section-head"><span class="tag">Progress</span><h2>How we got here</h2></div>
+    <div class="timeline">
+      <div class="tl-item milestone"><div class="tl-date">earlier</div><div class="tl-text">Part A (proposal) and Part B (implementation plan) submitted, <strong>10 pts</strong> pending completion</div></div>
+      <div class="tl-item milestone"><div class="tl-date">2026-09-07</div><div class="tl-text">Baselines evaluated for real over 20 episodes: altitude-hold &minus;323.8, random &minus;260.1</div></div>
+      <div class="tl-item milestone"><div class="tl-date">2026-09-24</div><div class="tl-text">Repo re-audited against Part B: 16 of 16 tests pass, no teammate branches on the remote, PPO wrapper found broken</div></div>
+      <div class="tl-item milestone"><div class="tl-date">2026-09-24</div><div class="tl-text">Deadlines confirmed: <strong>Part C Mon 5 Oct, Part D Mon 12 Oct, Part E Fri 23 Oct</strong>. Juan owns the environment</div></div>
+      <div class="tl-item milestone"><div class="tl-date">2026-09-24</div><div class="tl-text">Env v1 merged into main (PR #1): inner controller, reward v1, levels L0&ndash;L4, 25 tests. Baselines on held-out seeds at L3: altitude-hold &minus;153, random &minus;163</div></div>
+      <div class="tl-item now"><div class="tl-date">now, 2026-09-24</div><div class="tl-text">Pages updated. <strong>Next:</strong> the team pulls main and starts on their notebooks; Juan writes REINFORCE</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>A plain summary for the team, not the source of truth: that is the Part B PDF in <code class="inline">study_docs/proposals</code> plus the repo itself. Internal targets are ours, not official deadlines. Parts C (Mon 5 Oct), D (Mon 12 Oct) and E (Fri 23 Oct) are fixed; dates for F and G are not known yet.</p>
+    <p>Coverage figures are the author's estimates as of 2026-09-24 and should be re-scored at each gate.</p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var coverage = [
+    ['Env core: physics, 14-dim obs, wind', 95, '25 of 25 tests pass, merged into main'],
+    ['High-level action space + inner PD', 90, 'built and tested; gains not tuned'],
+    ['Reward v1: squared errors + w5 progress', 70, 'built and configurable; weights untuned'],
+    ['Difficulty levels L0 to L4', 90, 'all five built and tested'],
+    ['Baselines: altitude-hold, random', 90, 'run in the new action space'],
+    ['Evaluation harness', 50, 'no multi-seed, per-level or sample cost'],
+    ['PPO via CleanRL', 20, 'notebook ready; wrapper still fails on import'],
+    ['REINFORCE', 10, 'notebook scaffold only, no algorithm code'],
+    ['A2C', 10, 'notebook scaffold only, no algorithm code'],
+    ['Viewer with three policies', 30, 'baselines only, no checkpoint loading'],
+    ['Cloud training, Colab, learning curves', 15, 'Colab bootstrap and curve plot exist; SageMaker not set up'],
+    ['Results for Parts C and E', 0, 'no training runs yet']
+  ];
+  var covEl = document.getElementById('coverage');
+  coverage.forEach(function (c) {
+    var row = document.createElement('div'); row.className = 'cov-row';
+    var name = document.createElement('div'); name.className = 'cov-name';
+    name.textContent = c[0];
+    var sub = document.createElement('small'); sub.textContent = c[2]; name.appendChild(sub);
+    var track = document.createElement('div'); track.className = 'cov-track';
+    var fill = document.createElement('div');
+    fill.className = 'cov-fill ' + (c[1] >= 80 ? 'high' : (c[1] < 25 ? 'low' : ''));
+    fill.style.width = c[1] + '%';
+    track.appendChild(fill);
+    var val = document.createElement('div'); val.className = 'cov-val'; val.textContent = c[1] + '%';
+    row.appendChild(name); row.appendChild(track); row.appendChild(val);
+    covEl.appendChild(row);
+  });
+
+  var events = [
+    ['2026-09-24', 'all', 'Kickoff: roles, one branch each'],
+    ['2026-09-24', 'juan', 'ENV v1 MERGED (done)', 'ms'],
+    ['2026-09-25', 'juan', 'REINFORCE code'],
+    ['2026-09-25', 'nelkit', 'Vendor CleanRL PPO'],
+    ['2026-09-25', 'panzhao', 'A2C code'],
+    ['2026-09-26', 'juan', 'REINFORCE L0 run'],
+    ['2026-09-26', 'nelkit', 'Verify SageMaker / Colab'],
+    ['2026-09-26', 'panzhao', 'Eval: multi-seed runs'],
+    ['2026-09-27', 'juan', 'Cruise+centre baseline (proposed)'],
+    ['2026-09-28', 'nelkit', 'PPO L0 run'],
+    ['2026-09-28', 'panzhao', 'A2C L0 run'],
+    ['2026-09-29', 'all', 'Calibrate time per 1M steps'],
+    ['2026-09-30', 'juan', 'Watch flights: reward-hacking check'],
+    ['2026-10-01', 'juan', 'Part D draft'],
+    ['2026-10-02', 'all', 'STAGE 1 GATE: 3 curves at L0', 'ms'],
+    ['2026-10-02', 'all', 'Part C pack ready', 'ms'],
+    ['2026-10-04', 'all', 'Submit Part C (aim)', 'ms'],
+    ['2026-10-05', 'all', 'PART C DUE', 'due'],
+    ['2026-10-06', 'nelkit', 'PPO sweep L1-L2'],
+    ['2026-10-06', 'juan', 'REINFORCE tuning'],
+    ['2026-10-06', 'panzhao', 'A2C tuning'],
+    ['2026-10-07', 'all', 'Tuning runs, 3 seeds each'],
+    ['2026-10-08', 'juan', 'Part D polish'],
+    ['2026-10-09', 'all', 'STAGE 2 GATE + fallback call', 'ms'],
+    ['2026-10-09', 'juan', 'Part D pack ready', 'ms'],
+    ['2026-10-11', 'juan', 'Submit Part D (aim)', 'ms'],
+    ['2026-10-12', 'all', 'PART D DUE', 'due'],
+    ['2026-10-12', 'all', 'Report outline + owners'],
+    ['2026-10-13', 'all', 'L3-L4 runs if L2 cleared'],
+    ['2026-10-14', 'all', 'Checkpoints to eval harness'],
+    ['2026-10-15', 'panzhao', 'Final eval, fixed seeds'],
+    ['2026-10-15', 'nelkit', 'Viewer v2: 3 policies'],
+    ['2026-10-16', 'nelkit', 'Record demo videos'],
+    ['2026-10-16', 'all', 'Cross-teaching 1 (oral defence)'],
+    ['2026-10-18', 'all', 'EXPERIMENT FREEZE', 'ms'],
+    ['2026-10-19', 'all', 'Full report draft in'],
+    ['2026-10-20', 'all', 'Cross-review of sections'],
+    ['2026-10-21', 'nelkit', 'Colab notebook clean'],
+    ['2026-10-21', 'panzhao', 'Figures + tables final'],
+    ['2026-10-22', 'all', 'Proofread + contribution table'],
+    ['2026-10-22', 'all', 'Cross-teaching 2'],
+    ['2026-10-23', 'all', 'SUBMIT PART E (aim 17:00, due 23:59)', 'due']
+  ];
+  var names = { all: 'Whole team', nelkit: 'Nelkit', juan: 'Juan', panzhao: 'Panzhao' };
+  var WIN_START = '2026-09-24', WIN_END = '2026-10-23';
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  var now = new Date();
+  var todayIso = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+
+  var cal = document.getElementById('cal');
+  DAYS.forEach(function (d) {
+    var h = document.createElement('div'); h.className = 'cal-h'; h.textContent = d; cal.appendChild(h);
+  });
+
+  var start = Date.UTC(2026, 8, 21);
+  for (var i = 0; i < 35; i++) {
+    var dt = new Date(start + i * 86400000);
+    var iso = dt.getUTCFullYear() + '-' + pad(dt.getUTCMonth() + 1) + '-' + pad(dt.getUTCDate());
+    var dow = dt.getUTCDay();
+    var cell = document.createElement('div');
+    cell.className = 'day' + (dow === 0 || dow === 6 ? ' wknd' : '') +
+      (iso < WIN_START || iso > WIN_END ? ' out' : '') + (iso === todayIso ? ' today' : '');
+    var dn = document.createElement('div'); dn.className = 'dn';
+    var b = document.createElement('b');
+    b.textContent = (dt.getUTCDate() === 1 || i === 0) ? dt.getUTCDate() + ' ' + MONTHS[dt.getUTCMonth()] : dt.getUTCDate();
+    dn.appendChild(b); cell.appendChild(dn);
+    events.forEach(function (e) {
+      if (e[0] !== iso) return;
+      var ev = document.createElement('div');
+      ev.className = 'ev o-' + e[1] + (e[3] ? ' ' + e[3] : '');
+      ev.dataset.who = e[1];
+      ev.title = names[e[1]];
+      ev.textContent = e[2];
+      cell.appendChild(ev);
+    });
+    cal.appendChild(cell);
+  }
+
+  var filters = document.getElementById('filters');
+  filters.addEventListener('click', function (e) {
+    var btn = e.target.closest('button'); if (!btn) return;
+    var f = btn.dataset.f;
+    Array.prototype.forEach.call(filters.children, function (x) {
+      x.setAttribute('aria-pressed', x === btn ? 'true' : 'false');
+    });
+    Array.prototype.forEach.call(cal.querySelectorAll('.ev'), function (ev) {
+      ev.hidden = !(f === 'all' || ev.dataset.who === f || ev.dataset.who === 'all');
+    });
+  });
+})();
+</script>
+</body>
+</html>

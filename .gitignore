@@ -36,3 +36,12 @@ htmlcov/
 .vscode/
 .idea/
 *.swp
+
+# --- Submitted assignments (contain student IDs and emails) ---
+study_docs/proposals/
+
+# --- Submitted assignments (contain student IDs and emails) ---
+study_docs/proposals/
+
+# --- Submitted assignments (contain student IDs and emails) ---
+study_docs/proposals/
