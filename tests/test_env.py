@@ -356,6 +356,29 @@ def test_completing_the_row_beats_hovering_in_place():
     assert total_reward(FORWARD) > total_reward(HOLD)
 
 
+def test_crashing_on_purpose_never_beats_riding_out_a_bad_flight():
+    """The flight envelope (Nelkit, d90d5a3) caps per-step penalties, so a policy
+    could otherwise learn to crash early on purpose to dodge the rest of a bad
+    episode. crash_penalty must stay large enough that it doesn't."""
+    def total_reward(level, action):
+        e = AgroDroneEnv(xml_path=MODEL_XML, level=level, seed=0)
+        try:
+            e.reset(seed=0)
+            total = 0.0
+            for _ in range(e.max_steps):
+                _, r, terminated, truncated, _ = e.step(action)
+                total += r
+                if terminated or truncated:
+                    break
+            return total
+        finally:
+            e.close()
+
+    climb_out = np.array([0.0, 0.0, 1.0, 0.0], dtype=np.float32)
+    for level in (2, 3):
+        assert total_reward(level, HOLD) > total_reward(level, climb_out)
+
+
 def test_reward_weights_are_configurable():
     def first_reward(cfg):
         e = AgroDroneEnv(xml_path=MODEL_XML, level=1, seed=0, reward_config=cfg)

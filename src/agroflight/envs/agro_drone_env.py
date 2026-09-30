@@ -64,7 +64,10 @@ class RewardConfig:
     w_action: float = 0.01
     w_progress: float = 10.0
     survival_bonus: float = 0.02
-    crash_penalty: float = 50.0
+    # Must exceed the cost of riding out a bad flight for the rest of the episode
+    # under the flight-envelope bound, or crashing on purpose pays off at L2+
+    # (measured: hovering in wind costs up to ~-297 over 1000 steps; 50 was too low).
+    crash_penalty: float = 300.0
     completion_bonus: float = 20.0
 
 
