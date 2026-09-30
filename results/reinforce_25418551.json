@@ -6,8 +6,8 @@
     "id": "25418551"
   },
   "env_id": "AgroDrone-v0",
-  "git_commit": "56156ca",
-  "created": "2026-09-24T18:20:58",
+  "git_commit": "a171e9e",
+  "created": "2026-09-30T15:05:18",
   "hparams": {
     "total_timesteps": 200000,
     "learning_rate": 0.0003,
@@ -24,7 +24,7 @@
   "training": {
     "train_seed": 0,
     "total_timesteps": 200000,
-    "wall_clock_s": 72.32206511497498,
+    "wall_clock_s": 77.44370985031128,
     "best_checkpoint": "/Users/juandavid/Desktop/semester_4/reinforcement_learning/Project/agroflight-rl-main/checkpoints/reinforce_25418551_best.pt",
     "curve": [
       {
@@ -833,7 +833,7 @@
         "train_seed": 0,
         "level": 0,
         "total_timesteps": 200000,
-        "wall_clock_s": 72.32206511497498,
+        "wall_clock_s": 77.44370985031128,
         "best_checkpoint": "/Users/juandavid/Desktop/semester_4/reinforcement_learning/Project/agroflight-rl-main/checkpoints/reinforce_25418551_best.pt",
         "best_train_avg_return": 16.686489535758955,
         "curve": [
@@ -1643,7 +1643,7 @@
         "train_seed": 1,
         "level": 0,
         "total_timesteps": 200000,
-        "wall_clock_s": 73.50521874427795,
+        "wall_clock_s": 74.49164009094238,
         "best_checkpoint": "/Users/juandavid/Desktop/semester_4/reinforcement_learning/Project/agroflight-rl-main/checkpoints/reinforce_25418551_L0_seed1.pt",
         "best_train_avg_return": 16.30913540952866,
         "curve": [
@@ -2453,7 +2453,7 @@
         "train_seed": 2,
         "level": 0,
         "total_timesteps": 200000,
-        "wall_clock_s": 72.3533067703247,
+        "wall_clock_s": 74.0004289150238,
         "best_checkpoint": "/Users/juandavid/Desktop/semester_4/reinforcement_learning/Project/agroflight-rl-main/checkpoints/reinforce_25418551_L0_seed2.pt",
         "best_train_avg_return": 15.708048255026677,
         "curve": [
@@ -3262,8 +3262,8 @@
       "L1_seed0": {
         "train_seed": 0,
         "level": 1,
-        "total_timesteps": 200449,
-        "wall_clock_s": 7548.712303876877,
+        "total_timesteps": 200185,
+        "wall_clock_s": 75.18222713470459,
         "best_checkpoint": "/Users/juandavid/Desktop/semester_4/reinforcement_learning/Project/agroflight-rl-main/checkpoints/reinforce_25418551_L1_seed0.pt",
         "best_train_avg_return": 36.1444047493235,
         "curve": [
@@ -4040,44 +4040,44 @@
             "mean_return": -597.4173684749355
           },
           {
-            "timesteps": 193997,
-            "mean_return": -1203.6026682537329
+            "timesteps": 193945,
+            "mean_return": -1330.6738705430703
           },
           {
-            "timesteps": 194987,
-            "mean_return": -921.401911605857
+            "timesteps": 194924,
+            "mean_return": -848.8823531239407
           },
           {
-            "timesteps": 195915,
-            "mean_return": -1473.6899805153853
+            "timesteps": 195798,
+            "mean_return": -1405.7189099170016
           },
           {
-            "timesteps": 196839,
-            "mean_return": -996.3122377670339
+            "timesteps": 196668,
+            "mean_return": -1005.5482738283529
           },
           {
-            "timesteps": 197723,
-            "mean_return": -877.1544002154351
+            "timesteps": 197542,
+            "mean_return": -955.9912580284274
           },
           {
-            "timesteps": 198631,
-            "mean_return": -831.5086683474192
+            "timesteps": 198427,
+            "mean_return": -625.1876610218602
           },
           {
-            "timesteps": 199528,
-            "mean_return": -886.8261455812311
+            "timesteps": 199305,
+            "mean_return": -598.9091989447178
           },
           {
-            "timesteps": 200449,
-            "mean_return": -865.996728829163
+            "timesteps": 200185,
+            "mean_return": -620.7959088987762
           }
         ]
       },
       "L1_seed1": {
         "train_seed": 1,
         "level": 1,
-        "total_timesteps": 200000,
-        "wall_clock_s": 76.28732490539551,
+        "total_timesteps": 200071,
+        "wall_clock_s": 75.12561893463135,
         "best_checkpoint": "/Users/juandavid/Desktop/semester_4/reinforcement_learning/Project/agroflight-rl-main/checkpoints/reinforce_25418551_L1_seed1.pt",
         "best_train_avg_return": 19.720347040064937,
         "curve": [
@@ -4858,28 +4858,32 @@
             "mean_return": -583.5263558556612
           },
           {
-            "timesteps": 195000,
-            "mean_return": -916.3648105318407
+            "timesteps": 194936,
+            "mean_return": -1066.1669746319906
           },
           {
-            "timesteps": 196000,
-            "mean_return": -843.798673006371
+            "timesteps": 195889,
+            "mean_return": -1051.4125339494854
           },
           {
-            "timesteps": 197000,
-            "mean_return": -826.3357770509353
+            "timesteps": 196834,
+            "mean_return": -1005.1243984190144
           },
           {
-            "timesteps": 198000,
-            "mean_return": -910.4294768148868
+            "timesteps": 197751,
+            "mean_return": -992.9263732607692
           },
           {
-            "timesteps": 199000,
-            "mean_return": -1514.2350694851523
+            "timesteps": 198490,
+            "mean_return": -918.9302118608794
           },
           {
-            "timesteps": 200000,
-            "mean_return": -1418.3409256947893
+            "timesteps": 199284,
+            "mean_return": -938.5290419738747
+          },
+          {
+            "timesteps": 200071,
+            "mean_return": -942.3089070563709
           }
         ]
       },
@@ -4887,7 +4891,7 @@
         "train_seed": 2,
         "level": 1,
         "total_timesteps": 200000,
-        "wall_clock_s": 72.98809003829956,
+        "wall_clock_s": 74.1971640586853,
         "best_checkpoint": "/Users/juandavid/Desktop/semester_4/reinforcement_learning/Project/agroflight-rl-main/checkpoints/reinforce_25418551_L1_seed2.pt",
         "best_train_avg_return": 24.005056216526757,
         "curve": [
