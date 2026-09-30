@@ -103,7 +103,8 @@ class AgroDroneEnv(gym.Env):
 
     def __init__(self, xml_path=None, target_altitude=1.2, field_length=8.0,
                  wind_strength=0.6, max_steps=1000, seed=None,
-                 frame_skip=1, yaw_free=None, level=DEFAULT_LEVEL, reward_config=None):
+                 frame_skip=1, yaw_free=None, level=DEFAULT_LEVEL, reward_config=None,
+                 max_alt_error=1.0, max_lateral_offset=1.0):
         super().__init__()
         self.model = mujoco.MjModel.from_xml_path(_resolve_xml_path(xml_path))
         self.data = mujoco.MjData(self.model)
@@ -113,6 +114,13 @@ class AgroDroneEnv(gym.Env):
         self.wind_strength = wind_strength
         self.max_steps = max_steps
         self.frame_skip = frame_skip
+        # Flight envelope around the row (metres). Leaving it ends the episode as a
+        # crash. Without it nothing stops the drone drifting away: random horizontal
+        # commands make it climb ~10 m in 1000 steps, and the quadratic alt/lateral
+        # penalties then grow without bound (returns of order -50k per episode).
+        # None disables a bound.
+        self.max_alt_error = max_alt_error
+        self.max_lateral_offset = max_lateral_offset
 
         if level not in LEVELS:
             raise ValueError(f"level must be one of {sorted(LEVELS)}, got {level!r}")
@@ -241,7 +249,12 @@ class AgroDroneEnv(gym.Env):
         if self._row_task:
             reward += cfg.w_progress * (float(pos[0]) - prev_x)
 
-        crashed = bool(pos[2] < 0.08 or tilt > 1.2)   # hit ground or flipped over
+        out_of_bounds = bool(
+            (self.max_alt_error is not None and abs(alt_error) > self.max_alt_error)
+            or (self.max_lateral_offset is not None and abs(lateral_offset) > self.max_lateral_offset)
+        )
+        # hit ground, flipped over, or left the flight envelope (counted as a crash)
+        crashed = bool(pos[2] < 0.08 or tilt > 1.2 or out_of_bounds)
         finished_row = bool(self._row_task and pos[0] >= self.field_length)
         truncated = self._steps >= self.max_steps
         terminated = crashed or finished_row
@@ -253,6 +266,7 @@ class AgroDroneEnv(gym.Env):
 
         info = {
             "crashed": crashed,
+            "out_of_bounds": out_of_bounds,
             "finished_row": finished_row,
             "alt_error": float(alt_error),
             "lateral_offset": float(lateral_offset),
