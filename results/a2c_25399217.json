@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "algorithm": "A2C",
+  "student": {
+    "name": "Panzhao Li",
+    "id": "25399217"
+  },
+  "env_id": "AgroDrone-v0",
+  "git_commit": "8ecf9ba",
+  "created": "2026-09-30T15:22:39",
+  "hparams": {
+    "total_timesteps": 200000,
+    "learning_rate": 0.0007,
+    "gamma": 0.99,
+    "n_steps": 5,
+    "vf_coef": 0.5,
+    "ent_coef": 0.01,
+    "hidden": [
+      64,
+      64
+    ]
+  },
+  "training": {
+    "train_seed": 0,
+    "total_timesteps": null,
+    "wall_clock_s": null,
+    "best_checkpoint": null,
+    "curve": []
+  },
+  "evaluation": {
+    "eval_seeds": [
+      1000,
+      1001,
+      1002,
+      1003,
+      1004,
+      1005,
+      1006,
+      1007,
+      1008,
+      1009,
+      1010,
+      1011,
+      1012,
+      1013,
+      1014,
+      1015,
+      1016,
+      1017,
+      1018,
+      1019
+    ],
+    "baselines": {
+      "altitude_hold": {
+        "mean_reward": 19.78107419923554,
+        "std_reward": 0.23963723661283526,
+        "crash_rate": 0.0,
+        "finish_rate": 0.0,
+        "mean_steps": 1000.0,
+        "mean_abs_alt_error": 0.002764199799880489,
+        "n_episodes": 20
+      },
+      "random": {
+        "mean_reward": 6.485319462925458,
+        "std_reward": 8.02820316191858,
+        "crash_rate": 0.0,
+        "finish_rate": 0.0,
+        "mean_steps": 1000.0,
+        "mean_abs_alt_error": 0.055578784207734655,
+        "n_episodes": 20
+      }
+    },
+    "levels": {}
+  }
+}
