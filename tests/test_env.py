@@ -229,6 +229,49 @@ def test_climb_command_raises_altitude():
         env.close()
 
 
+def _fly_until_done(env, action, max_steps=1000):
+    for _ in range(max_steps):
+        _, _, terminated, truncated, info = env.step(np.asarray(action, dtype=np.float32))
+        if terminated or truncated:
+            return terminated, info
+    return False, info
+
+
+def test_climbing_out_of_the_envelope_ends_as_crash():
+    env = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, level=0, seed=0)
+    try:
+        env.reset(seed=0)
+        terminated, info = _fly_until_done(env, [0.0, 0.0, 1.0, 0.0])
+        assert terminated and info["out_of_bounds"] and info["crashed"]
+        assert abs(info["alt_error"]) > env.max_alt_error
+    finally:
+        env.close()
+
+
+def test_drifting_sideways_out_of_the_envelope_ends_as_crash():
+    env = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, level=0, seed=0)
+    try:
+        env.reset(seed=0)
+        terminated, info = _fly_until_done(env, [0.0, 1.0, 0.0, 0.0])
+        assert terminated and info["out_of_bounds"] and info["crashed"]
+        assert abs(info["lateral_offset"]) > env.max_lateral_offset
+    finally:
+        env.close()
+
+
+def test_envelope_can_be_disabled():
+    env = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, level=0, seed=0,
+                       max_alt_error=None, max_lateral_offset=None)
+    try:
+        env.reset(seed=0)
+        for _ in range(300):   # a sustained climb of ~3 m, well past the default bound
+            _, _, terminated, _, info = env.step(np.array([0.0, 0.0, 1.0, 0.0], dtype=np.float32))
+            assert not terminated
+        assert not info["out_of_bounds"]
+    finally:
+        env.close()
+
+
 def test_yaw_is_held_unless_yaw_free():
     def final_yaw_rate(yaw_free):
         e = AgroDroneEnv(xml_path=MODEL_XML, wind_strength=0.0, seed=0, yaw_free=yaw_free)

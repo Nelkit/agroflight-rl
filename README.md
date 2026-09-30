@@ -34,6 +34,131 @@ export AGRO_DRONE_XML=$(pwd)/mujoco_menagerie/skydio_x2/x2.xml
 
 ---
 
+## Installation
+
+### Prerequisites
+
+| Requirement | Version | Notes |
+| ----------- | ------- | ----- |
+| Python | **3.11** (verified) | `pyproject.toml` declares `>=3.9`, but 3.11.4 is the version this project is actually developed and tested on. See the caveat below. |
+| `git` | any recent | Needed to sparse-clone the drone model |
+| `make` | any recent | Preinstalled on macOS/Linux; on Windows use WSL |
+
+> **Python version caveat.** Some CleanRL releases constrain themselves to
+> `>=3.8,<3.11`, so the declared `>=3.9` floor can produce a dependency
+> resolution conflict on older interpreters. If `make setup` fails while
+> resolving `cleanrl`, install with Python 3.11 explicitly (see
+> [Troubleshooting](#troubleshooting)) or skip the `train` extra.
+
+### Recommended: `make setup`
+
+This is the supported path — it creates the virtualenv, installs the package in
+editable mode, and pulls both the training and dev extras in one step:
+
+```bash
+make setup
+```
+
+Equivalent to:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install --upgrade pip
+.venv/bin/pip install -e ".[train,dev]"
+```
+
+`make setup` is idempotent: it stamps `.venv/.installed` and only reinstalls
+when `pyproject.toml` or `requirements.txt` changes.
+
+### Manual installation
+
+If you would rather manage the environment yourself:
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate        # Windows (WSL recommended): .venv/bin/activate
+pip install --upgrade pip
+pip install -e ".[train,dev]"
+```
+
+Then fetch the drone model, which is **not vendored** in this repository:
+
+```bash
+make menagerie
+```
+
+That sparse-clones only `skydio_x2/` from `mujoco_menagerie` (a full clone is
+several GB; the sparse checkout is a few MB).
+
+### Dependency groups
+
+Dependencies live in `pyproject.toml`. They are split so a broken CleanRL
+release cannot block the environment and tests from installing:
+
+| Group | Install with | Contents | Needed for |
+| ----- | ------------ | -------- | ---------- |
+| core | `pip install -e .` | `mujoco`, `gymnasium`, `numpy`, `tensorboard` | The env, the baselines, the viewer |
+| `train` | `pip install -e ".[train]"` | `cleanrl[mujoco]` | `make train` (PPO) |
+| `dev` | `pip install -e ".[dev]"` | `pytest` | `make test` |
+
+To install everything (what `make setup` does):
+
+```bash
+pip install -e ".[train,dev]"
+```
+
+If CleanRL fails to resolve on your machine, you can still work on the
+environment, the baselines, the viewer and the test suite:
+
+```bash
+pip install -e ".[dev]"   # core + pytest, no CleanRL
+```
+
+> **Note on `requirements.txt`.** That file mirrors the dependency list for
+> readability, but **nothing installs from it** — `make setup` and every
+> command above install from `pyproject.toml`. Treat `pyproject.toml` as the
+> single source of truth; if you add a dependency, add it there. (Reconciling
+> or removing the duplicate file is an open task — see
+> [Work still to do](#reproducibility).)
+
+### Verifying the installation
+
+```bash
+make test
+```
+
+A healthy run reports **15 passing tests**. If the suite reports everything as
+*skipped*, the Skydio X2 model is missing — run `make menagerie`.
+
+Then confirm the simulator renders:
+
+```bash
+make viewer
+```
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| All tests skipped | Drone model not cloned | `make menagerie` |
+| `ValueError: No xml_path given and AGRO_DRONE_XML env var not set` | Running a script outside `make` | `export AGRO_DRONE_XML=$(pwd)/mujoco_menagerie/skydio_x2/x2.xml` |
+| `.venv/bin/mjpython: Permission denied` on macOS | A **space in the project path** breaks the interpreter shebang | Move the repo to a path with no spaces (this bit us before — the folder was literally named `" agroflight-rl"`) |
+| Viewer exits immediately on macOS | MuJoCo's viewer must own the main thread | Use `make viewer`, not `python scripts/viewer.py` — the Makefile selects `mjpython` |
+| `pip` cannot resolve `cleanrl` | Interpreter outside CleanRL's supported range | Recreate the venv with 3.11: `rm -rf .venv && python3.11 -m venv .venv && make setup`, or install `".[dev]"` only |
+| `ImportError` from `cleanrl.ppo_continuous_action` | CleanRL API shifted between releases | `pip install "cleanrl[mujoco]"`; worst case vendor `ppo_continuous_action.py` and set `env_id="AgroDrone-v0"` |
+
+### Starting over
+
+```bash
+make clean      # removes .venv, the menagerie clone, runs/, caches
+make setup && make menagerie
+```
+
+Use `make clean-runs` instead if you only want to discard training runs and
+checkpoints while keeping the venv and the model.
+
+---
+
 ## The environment
 
 Registered with Gymnasium as **`AgroDrone-v0`**.
