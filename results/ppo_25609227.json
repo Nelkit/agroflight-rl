@@ -6,8 +6,8 @@
     "id": "25609227"
   },
   "env_id": "AgroDrone-v0",
-  "git_commit": "d90d5a3",
-  "created": "2026-09-29T12:04:16",
+  "git_commit": "3bc550f",
+  "created": "2026-10-01T11:23:58",
   "hparams": {
     "total_timesteps": 200000,
     "learning_rate": 0.0003,
@@ -28,7 +28,7 @@
   "training": {
     "train_seed": 0,
     "total_timesteps": 1000000,
-    "wall_clock_s": 481.53660106658936,
+    "wall_clock_s": 502.14396119117737,
     "best_checkpoint": "/Users/nelkitchavezcalona/Projects/UTS/RL/Reinforcement Learning - AT3/agroflight-rl/checkpoints/ppo_25609227_base_1M.pt",
     "curve": [
       {
