@@ -211,7 +211,7 @@ reward = −(w_alt·alt_error² + w_lat·lateral_offset² + w_tilt·tilt² + w_a
 ```
 
 `tilt` is the angle between the drone's up-axis and world-up (0 = level). All
-weights live in `RewardConfig` (defaults: 2, 2, 0.5, 0.01, 10, 0.02, 50, 20) and
+weights live in `RewardConfig` (defaults: 2, 2, 0.5, 0.01, 10, 0.02, 300, 20) and
 can be overridden with `AgroDroneEnv(reward_config=dict(...))` for sensitivity
 analysis. The progress term and completion bonus are set so that finishing the
 row beats hovering in place (checked in the tests).
