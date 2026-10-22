@@ -21,7 +21,9 @@ MENAGERIE_URL := https://github.com/google-deepmind/mujoco_menagerie.git
 # `mjpython` instead of `python`. Pick automatically.
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-VIEWER_PY := $(VENV)/bin/mjpython
+# Run mjpython through the venv python: its shebang breaks when the project
+# path contains spaces ("Reinforcement Learning - AT3").
+VIEWER_PY := $(PY) $(VENV)/bin/mjpython
 else
 VIEWER_PY := $(PY)
 endif
