@@ -40,14 +40,11 @@ htmlcov/
 # --- Submitted assignments (contain student IDs and emails) ---
 study_docs/proposals/
 
-# --- Submitted assignments (contain student IDs and emails) ---
-study_docs/proposals/
-
-# --- Submitted assignments (contain student IDs and emails) ---
-study_docs/proposals/
-
 # Training logs
 logs/
 
 # Keep per-run result JSONs under results/
 !results/**/runs/
+
+# Downloaded 3D model archives (the converted assets live in src/agroflight/envs/assets/)
+*.zip
