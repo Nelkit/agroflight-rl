@@ -30,7 +30,7 @@ endif
 
 export AGRO_DRONE_XML ?= $(CURDIR)/$(DRONE_XML)
 
-.PHONY: help setup menagerie test viewer train evaluate tensorboard clean clean-runs
+.PHONY: help setup menagerie test viewer clean clean-runs
 
 help: ## Show this help
 	@echo "agroflight-rl -- available targets:"
@@ -63,15 +63,6 @@ test: setup menagerie ## Run the pytest sanity suite
 
 viewer: setup menagerie ## Open the live desktop viewer (baseline controller, not a trained policy)
 	$(VIEWER_PY) scripts/viewer.py $(ARGS)
-
-train: setup menagerie ## Run PPO training (UNTUNED -- see the TODOs in the training module)
-	$(PY) -m agroflight.training.train_ppo_cleanrl
-
-evaluate: setup menagerie ## Evaluate the baselines (and your checkpoint, once wired in)
-	$(PY) -m agroflight.evaluation.evaluate_policy
-
-tensorboard: setup ## Open TensorBoard on the training runs
-	$(VENV)/bin/tensorboard --logdir runs
 
 clean-runs: ## Delete training runs and checkpoints (keeps the venv and the model)
 	rm -rf runs/ checkpoints/ wandb/

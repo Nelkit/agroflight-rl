@@ -1,15 +1,11 @@
 """
-Compares a TRAINED policy against the hand-coded baselines (altitude-hold,
-random). This comparison -- not the raw training reward curve -- is the actual
-evidence for the experimental-results section: does the learned policy beat a
-naive baseline on behaviour metrics, not just "reward went up"?
+Shared evaluation harness: rolls out a policy on fixed seeds and reports
+behaviour metrics (reward, crash rate, finish rate, steps, altitude error).
+Every notebook and script evaluates through `evaluate()` so the three
+algorithms and the baselines are measured the same way.
 
-Left as a skeleton on purpose: TODO markers show where you plug in your trained
-checkpoint and where you decide the evaluation protocol (episode count, seeds,
-success thresholds).
-
-Run:
-    python -m agroflight.evaluation.evaluate_policy
+    from agroflight.evaluation.evaluate_policy import evaluate
+    stats = evaluate(policy_fn, seeds=range(1000, 1020), env=env)
 """
 import os
 
@@ -17,19 +13,9 @@ import gymnasium as gym
 import numpy as np
 
 import agroflight.envs  # noqa: F401  (registers AgroDrone-v0)
-from agroflight.baselines import altitude_hold_action, random_action
 from agroflight.envs import ENV_ID
 
-# ---------------------------------------------------------------------------
-# TODO (team): DECIDE YOUR EVALUATION PROTOCOL.
-# How many episodes is enough to make a claim? Which seeds (and are they held
-# out from training)? What counts as "success" -- a crash-rate threshold, a
-# mean-reward threshold, a mean absolute altitude error in metres? Pick these
-# BEFORE you look at the trained results, and justify them in the report.
-# These are placeholders, not answers.
-# ---------------------------------------------------------------------------
-DEFAULT_N_EPISODES = 20   # TODO: justify this number
-DEFAULT_SEEDS = None      # TODO: None -> range(n_episodes). Decide on a held-out seed set.
+DEFAULT_N_EPISODES = 20   # used only when `seeds` is not given
 
 
 def run_episode(env, policy_fn, seed):
@@ -64,7 +50,7 @@ def run_episode(env, policy_fn, seed):
     }
 
 
-def evaluate(policy_fn, n_episodes=DEFAULT_N_EPISODES, seeds=DEFAULT_SEEDS, xml_path=None, env=None):
+def evaluate(policy_fn, n_episodes=DEFAULT_N_EPISODES, seeds=None, xml_path=None, env=None):
     """Run `policy_fn` for n_episodes and return summary stats.
 
     `policy_fn` takes an observation and returns an action.
@@ -102,41 +88,3 @@ def make_env(xml_path=None):
         )
     return gym.make(ENV_ID, xml_path=xml_path)
 
-
-def _format(name, stats):
-    return (
-        f"  {name:<14} mean_reward={stats['mean_reward']:8.2f} "
-        f"(±{stats['std_reward']:6.2f})  crash_rate={stats['crash_rate']:.0%}  "
-        f"finish_rate={stats['finish_rate']:.0%}  mean|alt_err|={stats['mean_abs_alt_error']:.3f}m"
-    )
-
-
-def main():
-    env = make_env()
-    rng = np.random.default_rng(0)
-
-    print(f"Baselines over {DEFAULT_N_EPISODES} episodes ({ENV_ID}):")
-    print(_format("altitude-hold", evaluate(altitude_hold_action, env=env)))
-    print(_format(
-        "random",
-        evaluate(lambda obs: random_action(env.action_space, rng), env=env),
-    ))
-    env.close()
-
-    # -----------------------------------------------------------------------
-    # TODO (team): load your trained checkpoint and evaluate it the same way.
-    # The three-way comparison (learned vs altitude-hold vs random) is your
-    # result. Example shape -- match whatever API your saved model exposes:
-    #
-    #   trained_agent = load_your_checkpoint("runs/AgroDrone-v0__ppo/agent.pt")
-    #   def trained_policy(obs):
-    #       return trained_agent.act(obs)
-    #   print(_format("trained PPO", evaluate(trained_policy)))
-    # -----------------------------------------------------------------------
-    print()
-    print("TODO: add your trained policy above once you have a checkpoint, then")
-    print("      compare mean_reward / crash_rate / finish_rate against these baselines.")
-
-
-if __name__ == "__main__":
-    main()

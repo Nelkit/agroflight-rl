@@ -6,11 +6,10 @@ random wind gusts push it off course.
 
 - **Physics:** MuJoCo, [Skydio X2](https://github.com/google-deepmind/mujoco_menagerie/tree/main/skydio_x2)
   from Google DeepMind's `mujoco_menagerie` (Apache-2.0).
-- **Algorithm:** PPO via [CleanRL](https://github.com/vwxyzjn/cleanrl). We call
-  CleanRL's reference implementation rather than reimplementing PPO.
-- **Status:** scaffolding complete, **nothing trained yet**. The reward
-  function, hyperparameters and evaluation protocol are deliberately untuned —
-  see [Work still to do](#work-still-to-do).
+- **Algorithms:** three policy-gradient methods compared on the same env and
+  reward: **PPO**, **REINFORCE** and **A2C**. Each one is implemented and
+  trained in its own notebook under `notebooks/`.
+- **Status:** trained on levels L0–L4; results live in `results/`.
 
 ---
 
@@ -43,12 +42,6 @@ export AGRO_DRONE_XML=$(pwd)/mujoco_menagerie/skydio_x2/x2.xml
 | Python | **3.11** (verified) | `pyproject.toml` declares `>=3.9`, but 3.11.4 is the version this project is actually developed and tested on. See the caveat below. |
 | `git` | any recent | Needed to sparse-clone the drone model |
 | `make` | any recent | Preinstalled on macOS/Linux; on Windows use WSL |
-
-> **Python version caveat.** Some CleanRL releases constrain themselves to
-> `>=3.8,<3.11`, so the declared `>=3.9` floor can produce a dependency
-> resolution conflict on older interpreters. If `make setup` fails while
-> resolving `cleanrl`, install with Python 3.11 explicitly (see
-> [Troubleshooting](#troubleshooting)) or skip the `train` extra.
 
 ### Recommended: `make setup`
 
@@ -92,13 +85,13 @@ several GB; the sparse checkout is a few MB).
 
 ### Dependency groups
 
-Dependencies live in `pyproject.toml`. They are split so a broken CleanRL
-release cannot block the environment and tests from installing:
+Dependencies live in `pyproject.toml`. They are split so the environment and
+tests can be installed without PyTorch:
 
 | Group | Install with | Contents | Needed for |
 | ----- | ------------ | -------- | ---------- |
-| core | `pip install -e .` | `mujoco`, `gymnasium`, `numpy`, `tensorboard` | The env, the baselines, the viewer |
-| `train` | `pip install -e ".[train]"` | `cleanrl[mujoco]` | `make train` (PPO) |
+| core | `pip install -e .` | `mujoco`, `gymnasium`, `numpy` | The env, the baselines, the viewer |
+| `train` | `pip install -e ".[train]"` | `torch`, `matplotlib`, `pandas` | The notebooks (training, evaluation, plots) |
 | `dev` | `pip install -e ".[dev]"` | `pytest` | `make test` |
 
 To install everything (what `make setup` does):
@@ -107,19 +100,16 @@ To install everything (what `make setup` does):
 pip install -e ".[train,dev]"
 ```
 
-If CleanRL fails to resolve on your machine, you can still work on the
-environment, the baselines, the viewer and the test suite:
+To work only on the environment, the baselines, the viewer and the tests:
 
 ```bash
-pip install -e ".[dev]"   # core + pytest, no CleanRL
+pip install -e ".[dev]"   # core + pytest, no PyTorch
 ```
 
 > **Note on `requirements.txt`.** That file mirrors the dependency list for
 > readability, but **nothing installs from it** — `make setup` and every
 > command above install from `pyproject.toml`. Treat `pyproject.toml` as the
-> single source of truth; if you add a dependency, add it there. (Reconciling
-> or removing the duplicate file is an open task — see
-> [Work still to do](#reproducibility).)
+> single source of truth; if you add a dependency, add it there.
 
 ### Verifying the installation
 
@@ -127,7 +117,7 @@ pip install -e ".[dev]"   # core + pytest, no CleanRL
 make test
 ```
 
-A healthy run reports **15 passing tests**. If the suite reports everything as
+A healthy run reports every test as passing. If the suite reports everything as
 *skipped*, the Skydio X2 model is missing — run `make menagerie`.
 
 Then confirm the simulator renders:
@@ -144,8 +134,6 @@ make viewer
 | `ValueError: No xml_path given and AGRO_DRONE_XML env var not set` | Running a script outside `make` | `export AGRO_DRONE_XML=$(pwd)/mujoco_menagerie/skydio_x2/x2.xml` |
 | `.venv/bin/mjpython: Permission denied` on macOS | A **space in the project path** breaks the interpreter shebang | Move the repo to a path with no spaces (this bit us before — the folder was literally named `" agroflight-rl"`) |
 | Viewer exits immediately on macOS | MuJoCo's viewer must own the main thread | Use `make viewer`, not `python scripts/viewer.py` — the Makefile selects `mjpython` |
-| `pip` cannot resolve `cleanrl` | Interpreter outside CleanRL's supported range | Recreate the venv with 3.11: `rm -rf .venv && python3.11 -m venv .venv && make setup`, or install `".[dev]"` only |
-| `ImportError` from `cleanrl.ppo_continuous_action` | CleanRL API shifted between releases | `pip install "cleanrl[mujoco]"`; worst case vendor `ppo_continuous_action.py` and set `env_id="AgroDrone-v0"` |
 
 ### Starting over
 
@@ -273,27 +261,25 @@ directly on macOS will fail because the viewer needs the main thread.
 The crop-row markers are **cosmetic only** (`contype=0 conaffinity=0`) — they
 have no collision and no effect on the physics or the learning problem.
 
-### Training
+### Training and evaluation (notebooks)
 
-```bash
-make train                    # or: python -m agroflight.training.train_ppo_cleanrl
-make tensorboard              # watch the reward curve at localhost:6006
+Training happens in one notebook per algorithm (`notebooks/ppo_25609227.ipynb`,
+`reinforce_25418551.ipynb`, `a2c_25399217.ipynb`); see `notebooks/README.md`
+and `docs/sagemaker_setup.md` for running them on SageMaker or Colab. REINFORCE's
+final L0–L4 runs can also be trained headless with
+`python -m agroflight.training.train_reinforce`.
+
+Every notebook evaluates through the same helper, deterministically, on the
+held-out seeds 1000–1019:
+
+```python
+from agroflight.evaluation.evaluate_policy import evaluate
+stats = evaluate(policy_fn, seeds=range(1000, 1020), env=env)
 ```
 
-Runs CleanRL's `ppo_continuous_action` against `AgroDrone-v0`. **Untuned:** it
-will train *something*, but nothing here has been set up to fly well.
-
-### Evaluation
-
-```bash
-make evaluate                 # or: python -m agroflight.evaluation.evaluate_policy
-```
-
-Reports mean reward, crash rate, row-completion rate and mean absolute altitude
-error for each baseline. Once you have a checkpoint, wire it in at the marked
-TODO in `src/agroflight/evaluation/evaluate_policy.py` — the **three-way
-comparison** (learned vs altitude-hold vs random) is the result worth
-reporting, not the training curve alone.
+It reports mean reward, crash rate, row-completion rate, mean steps and mean
+absolute altitude error, so learned policies and baselines are compared on the
+same metrics.
 
 ---
 
@@ -316,12 +302,13 @@ the gap a learned policy has to close.
 src/agroflight/
   envs/            AgroDroneEnv, inner controller, Gymnasium registration, plantation scene builder
   baselines/       altitude_hold, random controllers
-  training/        CleanRL PPO entry point
-  evaluation/      baseline + checkpoint evaluation
-scripts/viewer.py  live desktop demo
-notebooks/         exploration-phase notebooks (historical; package is source of truth)
+  training/        train_reinforce.py (headless REINFORCE runs for L0–L4)
+  evaluation/      evaluate(): shared evaluation used by every notebook
+notebooks/         one notebook per algorithm (PPO, REINFORCE, A2C)
+results/           result JSONs per algorithm, figures; archive/ holds superseded runs
+scripts/           viewer.py (live desktop demo), assemble_reinforce_results.py
 tests/test_env.py  API/sanity tests
-docs/project_plan.md  week-by-week plan template (team fills in)
+docs/              SageMaker setup guide
 ```
 
 ---
@@ -337,61 +324,19 @@ The suite covers **API compliance and numerical health only**: registration,
 control staying inside `ctrlrange`, hover holding altitude with zero action,
 and seed reproducibility.
 
-It deliberately contains **no tests asserting that a policy flies well**. There
-is no trained policy, and encoding performance thresholds in tests would be
-pre-answering the assignment. Performance claims belong in the evaluation
-module and the report.
+It deliberately contains **no tests asserting that a policy flies well**.
+Performance claims belong in the notebooks' evaluation and the report.
 
 The suite skips itself entirely if the Skydio X2 model is missing — run
 `make menagerie`.
 
 ---
 
-## Work still to do
-
-Everything below is **the team's own work** and is intentionally left
-unresolved in this scaffold.
-
-### Reward design — `src/agroflight/envs/agro_drone_env.py`
-- [ ] Tune the weights (altitude, lateral, tilt, action cost, step bonus).
-- [x] Forward progress has its own reward term (`w_progress`) in reward v1.
-- [ ] Revisit the crash penalty / completion bonus magnitudes.
-- [ ] Check for reward hacking — watch actual flight in the viewer, not just
-      the reward number.
-
-### Hyperparameters — `src/agroflight/training/train_ppo_cleanrl.py`
-- [ ] `total_timesteps` (200k is a pipeline smoke-test value, not a budget).
-- [ ] `learning_rate`, `gamma`, `gae_lambda`, `ent_coef`, `num_envs`,
-      `num_steps`.
-- [ ] Decide whether PPO is the right algorithm at all, or whether to compare
-      against SAC.
-
-### Evaluation protocol — `src/agroflight/evaluation/evaluate_policy.py`
-- [ ] Number of evaluation episodes and which seeds (held out from training?).
-- [ ] Success thresholds — define them *before* seeing trained results.
-- [ ] Load and wire in the trained checkpoint.
-- [ ] Decide whether to tune the altitude-hold PD gains so the baseline
-      comparison is a fair fight.
-
-### Environment design
-- [ ] Is observable wind the right choice, or should this be partially
-      observed?
-- [ ] Are `target_altitude`, `field_length` and `wind_strength` the right task
-      difficulty?
-- [ ] Domain randomisation across episodes?
-
-### Project management — `docs/project_plan.md`
-- [ ] Fill in the week-by-week plan, owners, milestones and risks.
-- [ ] Keep the experiment log current as you go.
-
-### Reproducibility
-- [ ] Pin dependency versions (`pip freeze`) before submission.
-
----
-
 ## Results
 
-<!-- TODO: fill in once you have training results -->
+Per-algorithm results (shared schema) are in `results/ppo_25609227.json`,
+`results/reinforce_25418551.json` and `results/a2c_25399217.json`; the
+analysis is in each notebook and in the final report.
 
 ---
 
@@ -400,12 +345,11 @@ unresolved in this scaffold.
 The repository **structure**, boilerplate, wiring and sanity tests were
 scaffolded with AI assistance, which the unit permits. The RL problem itself —
 reward design, hyperparameter tuning, training, evaluation, analysis and the
-report — is the team's own work and is left explicitly unsolved here. Every
-such decision is marked `TODO (team)` in the source.
+report — is the team's own work.
 
 ## Licence / attribution
 
 The Skydio X2 model comes from
 [`mujoco_menagerie`](https://github.com/google-deepmind/mujoco_menagerie)
 (Google DeepMind, Apache-2.0) and is fetched at setup time, not vendored.
-PPO comes from [CleanRL](https://github.com/vwxyzjn/cleanrl) (MIT).
+The PPO notebook follows the design of [CleanRL](https://github.com/vwxyzjn/cleanrl)'s `ppo_continuous_action.py` (MIT).

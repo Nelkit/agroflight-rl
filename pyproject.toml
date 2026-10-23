@@ -13,13 +13,10 @@ dependencies = [
     "mujoco",
     "gymnasium",
     "numpy",
-    "tensorboard",
 ]
 
 [project.optional-dependencies]
-# Notebooks and training. The pip `cleanrl` package (0.4.8) is an old gym-era
-# release that fails on import; PPO uses CleanRL's single-file script copied
-# into the repo instead.
+# Notebooks: training, evaluation and plots.
 train = ["torch", "matplotlib", "pandas"]
 dev = ["pytest"]
 
