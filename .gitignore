@@ -45,3 +45,6 @@ logs/
 
 # Keep per-run result JSONs under results/
 !results/**/runs/
+
+# Downloaded 3D model archives (the converted assets live in src/agroflight/envs/assets/)
+*.zip
