@@ -8,6 +8,7 @@ environment (`AgroDrone-v0`), reward and evaluation protocol:
 | `ppo_25609227.ipynb` | PPO (CleanRL-based) | Nelkit Chavez |
 | `reinforce_25418551.ipynb` | REINFORCE | Juan David Rodriguez |
 | `a2c_25399217.ipynb` | A2C | Panzhao Li |
+| `comparison.ipynb` | All three vs the baselines (reads `results/`, trains nothing) | Team |
 
 The cells labelled *Shared, identical in all three notebooks* (results schema,
 checkpoints, evaluation) must stay identical so one comparison notebook can read
