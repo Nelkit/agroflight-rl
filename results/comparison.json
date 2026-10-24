@@ -1,0 +1,113 @@
+{
+  "created": "2026-10-25T09:20:48",
+  "sources": {
+    "PPO": "ppo_25609227.json",
+    "REINFORCE": "reinforce_25418551.json",
+    "A2C": [
+      "a2c_25399217_L0_seed0_20261023_001506_390722.json",
+      "a2c_25399217_L0_seed1_20261023_120611_988642.json",
+      "a2c_25399217_L0_seed2_20261023_131220_840805.json",
+      "a2c_25399217_L1_seed0_20261023_134900_063854.json",
+      "a2c_25399217_L1_seed1_20261023_142605_897674.json",
+      "a2c_25399217_L1_seed2_20261023_144151_103965.json",
+      "a2c_25399217_L2_seed0_20261023_150625_050352.json",
+      "a2c_25399217_L2_seed1_20261023_155246_843132.json",
+      "a2c_25399217_L2_seed2_20261023_161757_242806.json",
+      "a2c_25399217_L3_seed0_20261023_163753_669137.json",
+      "a2c_25399217_L3_seed1_20261023_170838_088394.json",
+      "a2c_25399217_L3_seed2_20261023_173517_677929.json",
+      "a2c_25399217_L4_seed0_20261023_182126_977874.json",
+      "a2c_25399217_L4_seed1_20261023_184718_004197.json",
+      "a2c_25399217_L4_seed2_20261023_190358_675482.json"
+    ]
+  },
+  "eval_seeds": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010,
+    1011,
+    1012,
+    1013,
+    1014,
+    1015,
+    1016,
+    1017,
+    1018,
+    1019
+  ],
+  "reward_config": {
+    "crash_penalty": 300.0
+  },
+  "cruise_and_centre": {
+    "L0": {
+      "mean_reward": 6.391061595317095,
+      "std_reward": 0.2599216834732018,
+      "crash_rate": 0.0,
+      "finish_rate": 0.0,
+      "mean_steps": 1000.0,
+      "mean_abs_alt_error": 0.0036001458838590345,
+      "n_episodes": 20
+    },
+    "L1": {
+      "mean_reward": 99.71741176272718,
+      "std_reward": 1.105736042113585,
+      "crash_rate": 0.0,
+      "finish_rate": 1.0,
+      "mean_steps": 439.0,
+      "mean_abs_alt_error": 0.007720715204350739,
+      "n_episodes": 20
+    },
+    "L2": {
+      "mean_reward": 90.07459297223927,
+      "std_reward": 3.9672093194542657,
+      "crash_rate": 0.0,
+      "finish_rate": 1.0,
+      "mean_steps": 439.05,
+      "mean_abs_alt_error": 0.007708045678803915,
+      "n_episodes": 20
+    },
+    "L3": {
+      "mean_reward": 95.7766517626832,
+      "std_reward": 2.3172736315381584,
+      "crash_rate": 0.0,
+      "finish_rate": 1.0,
+      "mean_steps": 439.05,
+      "mean_abs_alt_error": 0.013210696572711322,
+      "n_episodes": 20
+    },
+    "L4": {
+      "mean_reward": 95.61122536395581,
+      "std_reward": 2.4396785084116828,
+      "crash_rate": 0.0,
+      "finish_rate": 1.0,
+      "mean_steps": 439.0,
+      "mean_abs_alt_error": 0.013211552413272893,
+      "n_episodes": 20
+    }
+  },
+  "headline": {
+    "PPO": {
+      "highest level, 3/3 seeds": "L4",
+      "highest level, >= 2/3 seeds": "L4",
+      "levels cleared (3/3 seeds)": 5
+    },
+    "REINFORCE": {
+      "highest level, 3/3 seeds": "L0",
+      "highest level, >= 2/3 seeds": "L0",
+      "levels cleared (3/3 seeds)": 1
+    },
+    "A2C": {
+      "highest level, 3/3 seeds": "none",
+      "highest level, >= 2/3 seeds": "none",
+      "levels cleared (3/3 seeds)": 0
+    }
+  }
+}
