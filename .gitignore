@@ -51,3 +51,6 @@ logs/
 
 # Keep per-run result JSONs under results/
 !results/**/runs/
+
+# --- AI usage declarations (never committed) ---
+study_docs/ai-declarations/
