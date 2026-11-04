@@ -67,6 +67,22 @@ def level_from_checkpoint(path):
     match = re.search(r"_L(\d)_", os.path.basename(path))
     return int(match.group(1)) if match else None
 
+def draw_wind_arrow(viewer, env, metres_per_newton=1.0):
+    scn = viewer.user_scn
+    scn.ngeom = 0
+    bid = env._drone_body_id
+    start = env.data.xpos[bid].copy()
+    force = env.data.xfrc_applied[bid, :3]
+    if np.linalg.norm(force) < 1e-3:
+        return
+    g = scn.geoms[0]
+    mujoco.mjv_initGeom(g, mujoco.mjtGeom.mjGEOM_ARROW, np.zeros(3),
+                        np.zeros(3), np.zeros(9),
+                        np.array([0.2, 0.6, 1.0, 1.0], dtype=np.float32))
+    mujoco.mjv_connector(g, mujoco.mjtGeom.mjGEOM_ARROW, 0.015,
+                         start, start + metres_per_newton * force)
+    scn.ngeom = 1
+
 def main():
     args = parse_args()
 
@@ -82,6 +98,15 @@ def main():
         level = 0
 
     xml_path = build_plantation_scene(args.drone_dir, field_length=args.field_length)
+    with open(xml_path) as f:
+        xml = f.read()
+    who = "PPO" if args.checkpoint else args.policy  
+    xml = xml.replace('model="Skydio X2 scene (plantation)"',
+                    f'model="AgriFlight-RL | Level L{level} | {who}"', 1)
+    titled_path = xml_path.replace(".xml", f"_L{level}.xml")
+    with open(titled_path, "w") as f:
+        f.write(xml)
+    xml_path = titled_path
     env = AgroDroneEnv(
         xml_path=xml_path,
         field_length=args.field_length,
@@ -110,6 +135,10 @@ def main():
             step_start = time.time()
 
             obs, reward, terminated, truncated, info = env.step(policy(obs))
+            draw_wind_arrow(viewer, env)
+            viewer.set_texts((None, mujoco.mjtGridPos.mjGRID_TOPLEFT,
+                  "Wind (lateral)\nWind (vertical)",
+                  f"{env._wind[0]:+.2f} N\n{0.3*env._wind[1]:+.2f} N"))
             viewer.sync()
 
             if terminated or truncated:
