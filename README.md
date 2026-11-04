@@ -71,7 +71,7 @@ docs/              SageMaker setup guide
 
 | Requirement | Version | Notes |
 | ----------- | ------- | ----- |
-| Python | **3.11** (verified) | `pyproject.toml` declares `>=3.9`, but 3.11.4 is the version this project is actually developed and tested on. |
+| Python | **3.11** (required) | `pyproject.toml` declares `>=3.11`, and `make setup` creates the venv with `python3.11`. The pinned versions in `requirements.txt` (e.g. gymnasium 1.4.0) do not install on 3.10. |
 | `git` | any recent | Needed to sparse-clone the drone model |
 | `make` | any recent | Preinstalled on macOS/Linux; on Windows use WSL |
 

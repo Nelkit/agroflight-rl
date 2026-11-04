@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agroflight-rl"
+version = "0.1.0"
+description = "RL for crop-row quadrotor flight control (MuJoCo Skydio X2)"
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "mujoco",
+    "gymnasium",
+    "numpy",
+]
+
+[project.optional-dependencies]
+# Notebooks: training, evaluation and plots.
+train = ["torch", "matplotlib", "pandas"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Scene assets (meshes, textures) ship with the package, not only in editable installs.
+[tool.setuptools.package-data]
+agroflight = ["envs/assets/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

@@ -7,7 +7,7 @@ name = "agroflight-rl"
 version = "0.1.0"
 description = "RL for crop-row quadrotor flight control (MuJoCo Skydio X2)"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 
 dependencies = [
     "mujoco",

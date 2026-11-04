@@ -42,7 +42,7 @@ help: ## Show this help
 setup: $(VENV)/.installed ## Create the venv and install the package (editable) + dev deps
 
 $(VENV)/.installed: pyproject.toml requirements.txt
-	@test -d $(VENV) || python3 -m venv $(VENV)
+	@test -d $(VENV) || python3.11 -m venv $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install -e ".[train,dev]"
 	@touch $@
