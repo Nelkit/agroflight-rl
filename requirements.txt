@@ -1,16 +1,25 @@
+# Python 3.11. Install from the repo root: pip install -r requirements.txt
+# The drone model is not a pip package; fetch it with: make menagerie
+
+# This package (agroflight)
+-e .
+
 # Core simulation + RL environment
-mujoco
-gymnasium
-numpy
+mujoco==3.15.0
+gymnasium==1.4.0
+numpy==2.4.6
 
 # Training and notebooks
-torch
-matplotlib
-pandas
+torch==2.14.1
+matplotlib==3.11.2
+pandas==3.0.6
+ipykernel==7.2.0
+
+# Asset conversion (scripts/gltf_to_obj.py)
+pillow==12.3.0
 
 # Testing
-pytest
+pytest==9.1.1
 
-# TODO (team): pin exact versions (`pip freeze > requirements.lock.txt`) once
-# the pipeline runs end-to-end, so all three of us and the marker reproduce the
-# same results. Unpinned deps are fine while scaffolding, not at submission.
+# Optional, only for gltf_to_obj.py --target-triangles
+# fast-simplification

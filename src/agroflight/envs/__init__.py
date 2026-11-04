@@ -34,8 +34,6 @@ if ENV_ID not in registry:
         entry_point="agroflight.envs.agro_drone_env:AgroDroneEnv",
         # NOTE: AgroDroneEnv already truncates itself at `max_steps`. This outer
         # TimeLimit is the value CleanRL's rollout length is matched against.
-        # TODO (team): keep this in sync with `num_steps` in the training config
-        # if you change the episode length.
         max_episode_steps=1000,
     )
 
