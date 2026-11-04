@@ -168,6 +168,31 @@ and the top-left corner shows its lateral and vertical components.
 The vineyard scene is **cosmetic only** (`contype=0 conaffinity=0`): it has no
 collision and no effect on the physics or the learning problem.
 
+#### Trained PPO policies
+
+The commands below run the best PPO seed for each level, meaning the `final`
+checkpoint with the highest mean reward on the held-out evaluation seeds:
+
+```bash
+# L0, seed 2 (19.78)
+make viewer ARGS="--checkpoint notebooks/runs/ppo_25609227/long/checkpoints/ppo_25609227_L0_seed2_final.pt --level 0"
+
+# L1, seed 1 (100.34)
+make viewer ARGS="--checkpoint notebooks/runs/ppo_25609227/long/checkpoints/ppo_25609227_L1_seed1_final.pt --level 1"
+
+# L2, seed 2 (99.80)
+make viewer ARGS="--checkpoint notebooks/runs/ppo_25609227/long/checkpoints/ppo_25609227_L2_seed2_final.pt --level 2"
+
+# L3, seed 2 (99.91)
+make viewer ARGS="--checkpoint notebooks/runs/ppo_25609227/long/checkpoints/ppo_25609227_L3_seed2_final.pt --level 3"
+
+# L4, seed 0 (97.95)
+make viewer ARGS="--checkpoint notebooks/runs/ppo_25609227/long/checkpoints/ppo_25609227_L4_seed0_final.pt --level 4"
+```
+
+Checkpoints are not versioned (`notebooks/runs/` is gitignored), so these paths
+only exist after running the PPO notebook in `long` mode.
+
 ### Training
 
 Training happens in one notebook per algorithm (`notebooks/ppo_25609227.ipynb`,
