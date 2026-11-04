@@ -4,6 +4,14 @@ AgroDroneEnv -- Gymnasium environment for the crop-row flight-control task.
 Physics: MuJoCo Skydio X2 quadrotor (Google DeepMind mujoco_menagerie,
 Apache-2.0, https://github.com/google-deepmind/mujoco_menagerie).
 
+Task: the agent flies the drone at a target altitude directly above a crop row
+(the world x-axis), while a slowly-varying random wind gust pushes it sideways,
+and makes progress down the row.
+
+Observation: 14-dim. Action: 4 normalised high-level commands in [-1, 1]
+(forward velocity, lateral velocity, climb rate, yaw rate). A fixed inner
+controller (inner_controller.py) turns them into rotor thrusts, so the policy
+never has to learn to hover from raw motor commands (Part B design).
 """
 import os
 from dataclasses import dataclass
