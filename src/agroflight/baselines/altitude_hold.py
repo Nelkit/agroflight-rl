@@ -3,10 +3,6 @@ import numpy as np
 
 from agroflight.envs.agro_drone_env import ACTION_SCALE
 
-# TODO (team): this gain is a first guess, not a tuned one. If you want the
-# baseline comparison in your report to be a fair fight, decide deliberately
-# whether to tune it (a well-tuned baseline is a much stronger claim than
-# beating a sloppy one) and document that choice.
 DEFAULT_KP_ALT = 1.5   # climb-rate command (m/s) per metre of altitude error
 
 
